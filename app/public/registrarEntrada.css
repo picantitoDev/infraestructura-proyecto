@@ -1,0 +1,475 @@
+/* registrarVenta.css */
+/* Modern stylesheet for Registrar Nueva Entrada */
+
+/* Base variables and reset */
+:root {
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --primary-light: #60a5fa;
+  --secondary: #64748b;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --danger: #ef4444;
+  --danger-dark: #dc2626;
+  --success: #10b981;
+  --success-dark: #059669;
+  --warning: #f59e0b;
+  --text: #1e293b;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --radius: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-sm: 0.25rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-color: #f8fafc;
+  color: var(--text);
+  line-height: 1.5;
+  padding: 0;
+  margin: 0;
+}
+
+/* Layout & Container */
+.venta-container {
+  max-width: 100%;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+}
+
+a {
+  text-decoration: none;
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--primary-dark);
+}
+
+a:before {
+  content: "";
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.title {
+  font-size: 2rem;
+  margin: 1.5rem 0;
+  color: var(--gray-800);
+  font-weight: 700;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.title:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 80px;
+  height: 4px;
+  background-color: var(--primary);
+  border-radius: 2px;
+}
+
+/* Sections */
+.seccion {
+  background-color: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--gray-200);
+}
+
+.seccion h3 {
+  display: flex;
+  align-items: center;
+  color: var(--gray-800);
+  margin-bottom: 1.25rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.5rem;
+  color: var(--primary);
+}
+
+/* Form Elements */
+select,
+input,
+textarea,
+button {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-300);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+select:focus,
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-position: right 1rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.textarea-field {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* Proveedor Section */
+#proveedor-info {
+  background-color: var(--gray-100);
+  padding: 1rem;
+  border-radius: var(--radius);
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.75rem;
+}
+
+#proveedor-info p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+#proveedor-info strong {
+  color: var(--gray-600);
+  font-weight: 600;
+}
+
+/* Search Section */
+.search {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.search-input {
+  padding-left: 2.5rem;
+  width: 100%;
+}
+
+.search::before {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.search-input:disabled {
+  background-color: var(--gray-100);
+  cursor: not-allowed;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+}
+
+th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background-color: var(--gray-100);
+  font-weight: 600;
+  color: var(--gray-700);
+  border-bottom: 1px solid var(--gray-300);
+}
+
+th:first-child {
+  border-top-left-radius: var(--radius-sm);
+}
+
+th:last-child {
+  border-top-right-radius: var(--radius-sm);
+}
+
+td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--gray-200);
+  color: var(--gray-700);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* Clean hover effect for table rows */
+tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+  background-color: var(--gray-100);
+}
+
+/* Product table */
+.productos-table button {
+  width: auto;
+  padding: 0.4rem 0.75rem;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.productos-table button:hover {
+  background-color: var(--primary-dark);
+}
+
+/* Resumen Table */
+.resumen-table button {
+  width: auto;
+  padding: 0.4rem 0.75rem;
+  background-color: var(--danger);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.resumen-table button:hover {
+  background-color: var(--danger-dark);
+}
+
+.cantidad-input {
+  width: 70px;
+  padding: 0.4rem 0.5rem;
+  text-align: center;
+}
+
+.total-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.total-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+/* Description section */
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+/* Submit Button */
+.submit-btn {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  max-width: 250px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:disabled {
+  background-color: var(--gray-400);
+  cursor: not-allowed;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .venta-container {
+    margin: 1rem auto;
+    padding: 0 1rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .seccion {
+    padding: 1.25rem;
+  }
+
+  #proveedor-info {
+    grid-template-columns: 1fr;
+  }
+
+  th,
+  td {
+    padding: 0.6rem 0.75rem;
+  }
+
+  /* Responsive table layout */
+  .resumen-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Table empty state */
+tbody tr td[colspan] {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--gray-500);
+  font-style: italic;
+}
+
+/* Improve input focus states */
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.seccion.orden {
+  background: #ffffff;
+  padding: 1.5rem 1.75rem;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  margin-bottom: 2rem;
+  max-width: 100%;           /* ajusta según tu layout */
+}
+
+.seccion.orden h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: black;             /* morado corporativo */
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.seccion.orden input#ordenId {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 1px solid #d1d5db;  /* gris suave */
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color .2s;
+  margin-bottom: .8rem;
+}
+
+.seccion.orden input#ordenId:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(13, 69, 173, 0.15);
+}
+
+.seccion.orden button#btnCargarOrden {
+  display: inline-block;
+  padding: 0.6rem 1.4rem;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background .25s, transform .15s;
+  margin-bottom: 1rem;
+}
+
+.seccion.orden button#btnCargarOrden:hover {
+  background:var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.seccion.orden #orden-info {
+  margin-top: 0.5rem;
+  background: #f9f9fb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+
+.seccion.orden #orden-info p {
+  margin: 0.35rem 0;
+  font-size: 0.95rem;
+}
+
+.seccion.orden #productos-orden {
+  margin-top: 0.8rem;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border: 1px dashed #c7c7d0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicon/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <title>Registrar Nueva Entrada</title>
+    <link rel="stylesheet" href="/registrarEntrada.css" />
+
+    <style>
+      .select-sin-flecha {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        pointer-events: none; /* impide interacción */
+        background-image: none; /* quita la flechita */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="venta-container">
+      <a href="/movimientos">← Atrás</a>
+      <h1 class="title">Registrar Entrada</h1>
+
+      <div class="seccion orden">
+        <h3>Orden de Reabastecimiento</h3>
+        <input
+          type="text"
+          id="ordenId"
+          name="ordenId"
+          placeholder="Ingrese ID de orden de reabastecimiento"
+        />
+        <button type="button" id="btnCargarOrden">Cargar Orden</button>
+
+        <!-- Datos de la orden cargada -->
+      <div id="orden-info" style="display: none;">
+        <div style="background-color: #f9fafb; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); max-width: 700px; margin: auto; font-family: 'Inter', sans-serif;">
+          <p style="font-size: 1.2rem; font-weight: bold; margin: 0;">ID Orden: <span id="orden-id"></span></p>
+          <p style="margin: 0.3rem 0;">Fecha: <span id="orden-fecha"></span></p>
+          <p style="margin: 0.3rem 0;">Proveedor: <strong><span id="orden-proveedor"></span></strong></p>
+
+          <div id="productos-orden" style="margin-top: 1.25rem;">
+            <!-- Aquí se insertará la lista de productos desde JS -->
+          </div>
+        </div>
+        <div id="incidencias-previas" style="margin-top: 1rem; display: none;"></div>
+      </div>
+
+      </div>
+
+      <form
+        action="/movimientos/registrar-entrada"
+        method="POST"
+        class="entrada-form"
+      >
+        <!-- Selección de Proveedor -->
+        <div class="seccion proveedor">
+          <h3>
+            <svg
+              class="icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              ></path>
+            </svg>
+            Proveedor
+          </h3>
+          <select id="proveedor" name="proveedor-select" disabled class="select-sin-flecha">
+            <option value="">Seleccione un proveedor</option>
+            <% proveedores.forEach(proveedor => { %>
+            <option value="<%= proveedor.id_proveedor %>">
+              <%= proveedor.razon_social %>
+            </option>
+            <% }); %>
+          </select>
+
+          <!-- Mostrar información del proveedor seleccionado -->
+          <div id="proveedor-info">
+            <p>
+              <strong>Razón Social:</strong>
+              <span id="proveedor-razon-social"></span>
+            </p>
+            <p><strong>RUC:</strong> <span id="proveedor-ruc"></span></p>
+            <p>
+              <strong>Teléfono:</strong> <span id="proveedor-telefono"></span>
+            </p>
+            <p><strong>Correo:</strong> <span id="proveedor-correo"></span></p>
+            <p>
+              <strong>Dirección:</strong> <span id="proveedor-direccion"></span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Buscar y Agregar Productos -->
+        <div class="seccion productos">
+          <h3>
+            <svg
+              class="icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              ></path>
+            </svg>
+            Productos
+          </h3>
+          <table class="productos-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Stock</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tablaProductos">
+                  <td colspan="3" style="text-align: center; color: #6b7280; font-style: italic;">
+                  Cargue una orden para mostrar productos disponibles.
+                </td>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Resumen de Entrada -->
+        <div class="seccion resumen-entrada">
+          
+          <h3>
+            <svg
+              class="icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              ></path>
+            </svg>
+            Resumen de Entrada
+          </h3>
+          <table class="resumen-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Incidencia</th>
+                <th>Quitar</th>
+              </tr>
+            </thead>
+            <tbody id="resumenEntrada">
+              <td colspan="4" style="text-align: center; color: #6b7280; font-style: italic;">
+                No se han agregado productos al resumen aún.
+              </td>
+            </tbody>
+          </table>
+          <div class="total-container" style="display: none;">
+            <p class="total-text">
+              Total: S/. <span id="totalVenta">0.00</span>
+            </p>
+          </div>
+          <input
+            type="hidden"
+            name="productos"
+            id="productos-seleccionados"
+            class="productos-seleccionados"
+          />
+          <input
+            type="hidden"
+            name="total"
+            id="input-total"
+            class="input-total"
+          />
+        </div>
+
+        <!-- Descripción -->
+        <div class="seccion descripcion" style="display: none;">
+          <div class="input-group">
+            <label for="descripcion">
+              <svg
+                class="icon"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                ></path>
+              </svg>
+              Descripción:
+            </label>
+            <textarea
+              name="descripcion"
+              id="descripcion"
+              rows="4"
+              cols="50"
+              placeholder="Agrega una breve descripción de la entrada"
+              class="textarea-field"
+            ></textarea>
+          </div>
+        </div>
+        <input type="hidden" name="id_orden" id="input-id-orden" />
+        <input type="hidden" name="proveedor" id="input-proveedor" />
+        <!-- Botón de Enviar -->
+        <div class="seccion submit-btn">
+          <button type="submit" class="submit-button btn-primary">
+            Registrar Entrada
+          </button>
+        </div>
+      </form>
+    </div>
+    <!-- Productos disponibles en JSON -->
+    <script id="productos-data" type="application/json">
+      <%- JSON.stringify(productos) %>
+    </script>
+
+    <script id="proveedores-data" type="application/json">
+      <%- JSON.stringify(proveedores) %>
+    </script>
+
+    <script>
+      const productos = JSON.parse(
+        document.getElementById("productos-data").textContent
+      )
+      const proveedores = JSON.parse(
+        document.getElementById("proveedores-data").textContent
+      )
+      const proveedorSelect = document.getElementById("proveedor")
+      const proveedorInfo = document.getElementById("proveedor-info")
+      const tablaProductos = document.getElementById("tablaProductos")
+      const resumenEntrada = document.getElementById("resumenEntrada")
+      const totalVenta = document.getElementById("totalVenta")
+      const productosInput = document.querySelector(".productos-seleccionados")
+      const hiddenTotal = document.querySelector(".input-total")
+      const carrito = []
+      const productosOrdenDiv = document.getElementById('productos-orden');
+      const ordenProveedorSpan = document.getElementById('orden-proveedor');
+      const incidenciasDiv = document.getElementById('incidencias-previas');
+
+      const ordenIdInput = document.getElementById('ordenId');
+      const btnCargarOrden = document.getElementById('btnCargarOrden');
+      const ordenInfoDiv = document.getElementById('orden-info');
+      const ordenIdSpan = document.getElementById('orden-id');
+      const ordenFechaSpan = document.getElementById('orden-fecha');
+      const ordenDescripcionSpan = document.getElementById('orden-descripcion');
+      let ordenActual = null;
+
+      // Evento para cargar una orden
+      btnCargarOrden.addEventListener('click', async () => {
+        const id = ordenIdInput.value.trim();
+        if (!id) {
+          alert('Por favor ingrese un ID de orden válido.');
+          return;
+        }
+
+        try {
+          const response = await fetch(`/ordenes/${id}`);
+          if (!response.ok) throw new Error('Orden no encontrada');
+
+          const orden = await response.json();
+          ordenActual = orden;
+
+
+          if (orden.estado === 'finalizada' || orden.estado === "cancelada") {
+            alert('Esta orden ya ha sido finalizada. No puedes registrar otra entrada para ella.');
+            ordenInfoDiv.style.display = 'none';
+            proveedorSelect.disabled = true;
+            tablaProductos.innerHTML = '<tr><td colspan="5">Ingrese y cargue una orden válida.</td></tr>';
+            return;
+          }
+
+          ordenIdSpan.textContent = orden.id_order;
+          ordenFechaSpan.textContent = new Date(orden.fecha).toLocaleDateString();
+          ordenProveedorSpan.textContent = orden.proveedor || 'Sin proveedor';
+          document.getElementById('input-id-orden').value = orden.id_order;
+          ordenInfoDiv.style.display = 'block';
+
+          proveedorSelect.disabled = false;
+
+          // Mostrar productos de la orden como tarjetas
+          if (orden.products && orden.products.length > 0) {
+            productosOrdenDiv.innerHTML = '';
+            orden.products.forEach(producto => {
+              const card = document.createElement('div');
+              card.style = `
+                background-color: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.5rem;
+                padding: 0.75rem 1rem;
+                margin-bottom: 0.5rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.95rem;
+                color: #374151;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+              `;
+
+              card.innerHTML = `
+                <span style="font-weight: 500;">${producto.nombre}</span>
+                <span style="font-weight: 600;">Cantidad: ${producto.cantidad}</span>
+              `;
+
+              productosOrdenDiv.appendChild(card);
+            });
+          } else {
+            productosOrdenDiv.innerHTML = '<p style="color: #6b7280;">No hay productos en esta orden.</p>';
+          }
+
+          // Autoseleccionar proveedor
+          const provId = orden.id_proveedor;
+          proveedorSelect.value = provId;
+          document.getElementById('input-proveedor').value = provId;
+          proveedorSelect.dispatchEvent(new Event('change'));
+          proveedorSelect.disabled = true;
+
+          // Cargar productos de la orden en la tabla de entrada
+          renderTablaBusqueda(orden.products);
+
+          // Mostrar incidencias previas (si existen)
+          const incidenciasDiv = document.getElementById('incidencias-previas');
+          if (orden.incidencias && orden.incidencias.length > 0) {
+          incidenciasDiv.innerHTML = '<h4 style="margin-bottom: 0.5rem;">📋 Incidencias previas asociadas a esta orden:</h4>';
+
+          orden.incidencias.forEach(inc => {
+            const fecha = new Date(inc.fecha).toLocaleDateString();
+
+            inc.detalle_productos.forEach(detalle => {
+              const item = document.createElement('div');
+              item.style = `
+                background-color: #fef2f2;
+                border: 1px solid #fca5a5;
+                padding: 0.5rem;
+                border-radius: 0.375rem;
+                margin-bottom: 0.5rem;
+                font-size: 0.9rem;
+                color: #991b1b;
+              `;
+              item.innerHTML = `
+                <strong>${fecha}</strong> - <strong>${detalle.nombre || 'Producto desconocido'}</strong>: ${detalle.incidencia || 'Sin detalle'}
+              `;
+              incidenciasDiv.appendChild(item);
+            });
+          });
+
+          incidenciasDiv.style.display = 'block';
+        } else {
+            incidenciasDiv.innerHTML = '<p style="color: #6b7280;">No se han registrado incidencias previas para esta orden.</p>';
+            incidenciasDiv.style.display = 'block';
+          }
+
+          // Limpiar carrito y resumen
+          carrito.length = 0;
+          renderResumenEntrada();
+
+        } catch (error) {
+          alert('Error al cargar la orden: ' + error.message);
+          ordenInfoDiv.style.display = 'none';
+          proveedorSelect.disabled = true;
+          tablaProductos.innerHTML = '<tr><td colspan="5">Ingrese y cargue una orden primero</td></tr>';
+        }
+      });
+
+      // Evento para cuando se selecciona un proveedor
+      proveedorSelect.addEventListener("change", (e) => {
+        const idProveedor = parseInt(e.target.value)
+        carrito.length = 0
+        renderResumenEntrada()
+
+        if (idProveedor) {
+          // Mostrar los datos del proveedor seleccionado
+          const proveedor = proveedores.find(
+            (p) => p.id_proveedor === idProveedor
+          )
+          if (proveedor) {
+            document.getElementById("proveedor-razon-social").textContent =
+              proveedor.razon_social
+            document.getElementById("proveedor-ruc").textContent = proveedor.ruc
+            document.getElementById("proveedor-telefono").textContent =
+              proveedor.numero_telefono
+            document.getElementById("proveedor-correo").textContent =
+              proveedor.correo
+            document.getElementById("proveedor-direccion").textContent =
+              proveedor.direccion
+
+            // Filtrar productos por nombre del proveedor (razón social)
+            const productosFiltrados = productos.filter((p) => {
+              return p.proveedor === proveedor.razon_social
+            })
+
+            renderTablaBusqueda(productosFiltrados)
+          } else {
+            console.log("Proveedor no encontrado")
+          }
+        } else {
+          // Limpiar la información del proveedor y deshabilitar la búsqueda
+          document.getElementById("proveedor-razon-social").textContent = ""
+          document.getElementById("proveedor-ruc").textContent = ""
+          document.getElementById("proveedor-telefono").textContent = ""
+          document.getElementById("proveedor-correo").textContent = ""
+          document.getElementById("proveedor-direccion").textContent = ""
+
+          // Limpiar la tabla de productos
+          tablaProductos.innerHTML = `<tr><td colspan="3">Seleccione un proveedor para ver los productos</td></tr>`
+        }
+      })
+
+      // Función para renderizar la tabla de productos filtrados
+      function renderTablaBusqueda(filtrados) {
+        tablaProductos.innerHTML = "" // Limpiar la tabla antes de agregar nuevas filas
+        if (filtrados.length === 0) {
+          tablaProductos.innerHTML = `<tr><td colspan="3">No se encontraron productos</td></tr>`
+          return
+        }
+            
+        // Itera sobre los productos filtrados y los muestra en la tabla
+        filtrados.forEach((prod) => {
+          // Buscar el producto en la orden actual
+          const productoOrden = ordenActual.products.find(p => p.id_producto === prod.id_producto);
+          const completado = productoOrden && productoOrden.ingresado >= productoOrden.cantidad;
+
+          // Crear el botón, dependiendo del estado
+          const botonAgregar = completado
+            ? `<button type="button" disabled style="opacity: 0.5; cursor: not-allowed;">Completado</button>`
+            : `<button type="button" onclick="agregarProducto(${prod.id_producto})">Agregar</button>`;
+
+          const row = document.createElement("tr")
+          row.innerHTML = `
+            <td>${prod.nombre}</td>
+            <td>${prod.stock}</td>
+            <td>${botonAgregar}</td>
+          `
+          tablaProductos.appendChild(row)
+        })
+      }
+
+      // Función para agregar un producto al carrito
+      function agregarProducto(idProducto) {
+        const producto = productos.find((p) => p.id_producto === idProducto)
+        if (!producto) return
+
+        // Verificar si el producto ya está en el carrito
+        const existente = carrito.find(
+          (item) => item.producto.id_producto === idProducto
+        )
+
+        if (existente) {
+          // Si ya existe, incrementar la cantidad
+          existente.cantidad++
+        } else {
+          // Si no existe, agregarlo con cantidad 1
+          carrito.push({
+            producto: producto,
+            cantidad: 1,
+          })
+        }
+
+        renderResumenEntrada()
+      }
+
+      // Función para actualizar incidencia
+      function actualizarIncidencia(e) {
+      const index = e.target.dataset.index;
+      const value = e.target.value;
+      carrito[index].incidencia = value;
+      // No necesitas volver a renderizar, solo actualizas el valor en el carrito
+    }
+
+      // Función para renderizar los productos en el resumen
+      function renderResumenEntrada() {
+      resumenEntrada.innerHTML = "";
+        if (carrito.length === 0) {
+    resumenEntrada.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; color: #6b7280; font-style: italic;">
+          No se han agregado productos al resumen aún.
+        </td>
+      </tr>
+    `;
+    totalVenta.textContent = "0.00";
+    productosInput.value = "[]";
+    hiddenTotal.value = "0.00";
+    return;
+  }
+      let total = 0;
+
+      carrito.forEach((item, index) => {
+        const subtotal = item.producto.precio_unitario * item.cantidad;
+        total += subtotal;
+        
+        const productoOrden = ordenActual?.products.find(p => p.nombre === item.producto.nombre);
+        const cantidadMaxima = productoOrden ? productoOrden.cantidad - productoOrden.ingresado : 100;
+
+        const cantidadActual = item.cantidad;
+        const requiereIncidencia = cantidadActual < cantidadMaxima;
+        const incidenciaDisabled = !requiereIncidencia ? 'disabled style="background-color:#f3f4f6; cursor: not-allowed;"' : '';
+
+        const row = document.createElement("tr");
+        console.log("Cantidad Maxima:", cantidadMaxima)
+        row.innerHTML = `
+          <td>${item.producto.nombre}</td>
+          <td>
+            <input type="number" value="${item.cantidad}" min="1" 
+                  max="${cantidadMaxima}" class="cantidad-input" 
+                  data-index="${index}" />
+          </td>
+          <td>
+            <input type="text" class="incidencia-input" 
+                  placeholder="Incidencia..." data-index="${index}" 
+                  value="${item.incidencia || ""}" ${incidenciaDisabled} />
+          </td>
+          <td>
+            <button type="button" onclick="quitarProducto(${index})">Quitar</button>
+          </td>
+        `;
+        resumenEntrada.appendChild(row);
+      });
+
+      totalVenta.textContent = total.toFixed(2);
+
+      // Actualizar los campos ocultos para el formulario
+      const productosParaEnviar = carrito.map((item) => ({
+        ...item.producto,
+        cantidad: item.cantidad,
+        incidencia: item.incidencia || ""
+      }));
+      productosInput.value = JSON.stringify(productosParaEnviar);
+      hiddenTotal.value = total.toFixed(2);
+
+      // Eventos para inputs
+      document.querySelectorAll(".cantidad-input").forEach((input) => {
+        input.addEventListener("change", actualizarCantidad);
+      });
+
+      document.querySelectorAll(".incidencia-input").forEach((input) => {
+        input.addEventListener("input", actualizarIncidencia);
+      });
+}
+
+      // Función para actualizar cantidad
+      function actualizarCantidad(e) {
+        const index = parseInt(e.target.dataset.index)
+        const nuevaCantidad = parseInt(e.target.value)
+
+        if (nuevaCantidad > 0) {
+          carrito[index].cantidad = nuevaCantidad
+          renderResumenEntrada()
+        }
+      }
+
+      // Función para quitar un producto del carrito
+      function quitarProducto(index) {
+        if (index >= 0 && index < carrito.length) {
+          carrito.splice(index, 1)
+          renderResumenEntrada()
+        }
+      }
+      
+      // Validar formulario antes de enviar
+      const form = document.querySelector(".entrada-form")
+      const submitButton = document.querySelector(".submit-button")
+
+      form.addEventListener("submit", function (e) {
+        const proveedorSeleccionado = proveedorSelect.value;
+        if (!proveedorSeleccionado) {
+          alert("Por favor, seleccione un proveedor.");
+          e.preventDefault();
+          return;
+        }
+
+        if (carrito.length === 0) {
+          alert("Debe agregar al menos un producto al resumen de entrada.");
+          e.preventDefault();
+          return;
+        }
+
+         // Validar incidencias obligatorias
+        const productosConIncidenciaFaltante = [];
+
+        carrito.forEach((item) => {
+          const productoOrden = ordenActual?.products.find(
+            (p) => p.id_producto === item.producto.id_producto
+          );
+
+          if (!productoOrden) return;
+
+          const cantidadEsperada = productoOrden.cantidad - productoOrden.ingresado;
+          const cantidadIngresada = item.cantidad;
+
+          const requiereIncidencia = cantidadIngresada < cantidadEsperada;
+          const incidenciaVacia = !item.incidencia || item.incidencia.trim() === "";
+
+          if (requiereIncidencia && incidenciaVacia) {
+            productosConIncidenciaFaltante.push(item.producto.nombre);
+          }
+        });
+
+        if (productosConIncidenciaFaltante.length > 0) {
+          alert(
+            `Los siguientes productos requieren una incidencia porque se ingresó menos cantidad de la esperada:\n- ${productosConIncidenciaFaltante.join(
+              "\n- "
+            )}`
+          );
+          e.preventDefault();
+          return;
+        }
+
+        // Aquí aseguras que el input oculto tiene la info actualizada
+        const productosParaEnviar = carrito.map((item) => ({
+          ...item.producto,
+          cantidad: item.cantidad,
+          incidencia: item.incidencia || ""
+        }));
+        productosInput.value = JSON.stringify(productosParaEnviar);
+        hiddenTotal.value = carrito.reduce(
+          (acc, item) => acc + item.producto.precio_unitario * item.cantidad, 0
+        ).toFixed(2);
+
+        submitButton.textContent = "Registrando...";
+        submitButton.disabled = true;
+      });
+    </script>
+  </body>
+</html>
