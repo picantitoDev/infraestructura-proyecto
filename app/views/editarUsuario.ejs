@@ -1,0 +1,464 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Usuario</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --primary-color: #3498db;
+      --primary-dark: #2980b9;
+      --accent-color: #2ecc71;
+      --accent-dark: #27ae60;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --gray-light: #f5f5f5;
+      --gray-medium: #e0e0e0;
+      --gray-dark: #718093;
+      --text-color: #2d3436;
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      --border-radius: 6px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f9fafb;
+      color: var(--text-color);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 20px 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      background-color: white;
+      box-shadow: var(--shadow);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      border-radius: var(--border-radius);
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .back-btn:hover {
+      color: var(--primary-dark);
+    }
+
+    .back-arrow {
+      margin-right: 8px;
+      font-size: 18px;
+    }
+
+    /* Form Container */
+    .form-container {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+
+    .form-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .form-subtitle {
+      color: var(--gray-dark);
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-color);
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .form-input,
+    .form-select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--gray-medium);
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      transition: var(--transition);
+      background-color: white;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+
+    .form-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23718093' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 40px;
+    }
+
+    /* Status and Role Badges */
+    .status-info {
+      margin-top: 8px;
+      padding: 8px 12px;
+      background-color: var(--gray-light);
+      border-radius: var(--border-radius);
+      font-size: 12px;
+      color: var(--gray-dark);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-activado {
+      background-color: rgba(46, 204, 113, 0.1);
+      color: var(--accent-color);
+    }
+
+    .status-desactivado {
+      background-color: rgba(231, 76, 60, 0.1);
+      color: var(--danger-color);
+    }
+
+    .role-admin {
+      background-color: rgba(155, 89, 182, 0.1);
+      color: #9b59b6;
+    }
+
+    .role-usuario {
+      background-color: rgba(52, 152, 219, 0.1);
+      color: var(--primary-color);
+    }
+
+    /* Button Group */
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background-color: var(--gray-light);
+      color: var(--text-color);
+      border: 1px solid var(--gray-medium);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--gray-medium);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Error Messages */
+    .error-texto {
+      display: block;
+      color: var(--danger-color);
+      font-size: 12px;
+      margin-top: 6px;
+      padding: 6px 10px;
+      background-color: rgba(231, 76, 60, 0.1);
+      border-radius: var(--border-radius);
+      border-left: 3px solid var(--danger-color);
+    }
+
+    .form-input.input-error {
+      border-color: var(--danger-color);
+      box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 10px;
+      }
+      
+      .form-container {
+        padding: 20px;
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+      
+      .btn {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <a href="/usuarios" class="back-btn">
+        <span class="back-arrow">←</span>
+        Volver a Usuarios
+      </a>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container">
+      <h1 class="form-title">
+        <i class="fas fa-user-edit"></i>
+        Editar Usuario
+      </h1>
+      <p class="form-subtitle">Modifica la información del usuario seleccionado</p>
+      
+      <form action="/usuarios/editar/<%= usuario.id %>" method="POST">
+        <div class="form-group">
+          <label for="username" class="form-label">Nombre de Usuario</label>
+          <input 
+            type="text" 
+            id="username"
+            name="username" 
+            class="form-input"
+            value="<%= usuario.username %>" 
+            required 
+            placeholder="Ingresa el nombre de usuario"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="form-label">Correo Electrónico</label>
+          <input 
+            type="email" 
+            id="email"
+            name="email" 
+            class="form-input"
+            value="<%= usuario.email %>" 
+            required 
+            placeholder="usuario@ejemplo.com"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="rol" class="form-label">Rol del Usuario</label>
+          <select id="rol" name="rol" class="form-select">
+            <option value="Admin" <%= usuario.rol === 'Admin' ? 'selected' : '' %>>
+              Administrador
+            </option>
+            <option value="Usuario" <%= usuario.rol === 'Usuario' ? 'selected' : '' %>>
+              Usuario
+            </option>
+          </select>
+          <div class="status-info <%= usuario.rol === 'Admin' ? 'role-admin' : 'role-usuario' %>">
+            <i class="fas fa-<%= usuario.rol === 'Admin' ? 'crown' : 'user' %>"></i>
+            Rol actual: <%= usuario.rol %>
+          </div>
+        </div>
+
+      <div class="form-group">
+        <label for="estado" class="form-label">Estado de la Cuenta</label>
+        <select id="estado" name="estado" class="form-select">
+          <option value="Activado" <%= usuario.estado === 'Activado' ? 'selected' : '' %>>
+            Activado
+          </option>
+          <option value="Desactivado"
+            <%= usuario.estado === 'Desactivado' ? 'selected' : '' %>
+            <%= usuarioActual.id === usuario.id && usuarioActual.nivel_acceso === 'superadmin' ? 'disabled' : '' %>>
+            Desactivado
+          </option>
+        </select>
+        <div class="status-info <%= usuario.estado === 'Activado' ? 'status-activado' : 'status-desactivado' %>">
+          <i class="fas fa-circle"></i>
+          Estado actual: <%= usuario.estado %>
+        </div>
+      </div>
+        <div class="button-group">
+          <a href="/usuarios" class="btn btn-secondary">
+            <i class="fas fa-times"></i>
+            Cancelar
+          </a>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i>
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script id="usuarios-data" type="application/json">
+  <%- JSON.stringify(usuarios) %>
+</script>
+<script id="usuario-actual" type="application/json">
+  <%- JSON.stringify(usuario) %>
+</script>
+
+<script>
+  const usuariosRegistrados = JSON.parse(document.getElementById("usuarios-data").textContent);
+  const usuarioActual = JSON.parse(document.getElementById("usuario-actual").textContent);
+
+  const form = document.querySelector("form");
+  const nombre = form.querySelector("input[name='username']");
+  const email = form.querySelector("input[name='email']");
+  const btnSubmit = form.querySelector("button[type='submit']");
+
+  function mostrarError(input, mensaje) {
+    eliminarError(input);
+    const error = document.createElement("small");
+    error.className = "error-texto";
+    error.style.color = "red";
+    error.textContent = mensaje;
+    input.parentElement.appendChild(error);
+  }
+
+  function eliminarError(input) {
+    const error = input.parentElement.querySelector(".error-texto");
+    if (error) error.remove();
+  }
+
+  function validarNombre() {
+    const valor = nombre.value.trim();
+    const regex = /^[a-zA-ZÀ-ÿ\s]+$/;
+
+    if (valor === "") {
+      mostrarError(nombre, "Complete los campos");
+      return false;
+    }
+
+    if (!regex.test(valor)) {
+      mostrarError(nombre, "El nombre contiene caracteres inválidos");
+      return false;
+    }
+
+    const duplicado = usuariosRegistrados.some(u =>
+      u.username.toLowerCase() === valor.toLowerCase() && u.id !== usuarioActual.id
+    );
+    if (duplicado) {
+      mostrarError(nombre, "El nombre de usuario ya existe");
+      return false;
+    }
+
+    eliminarError(nombre);
+    return true;
+  }
+
+  function validarEmail() {
+    const valor = email.value.trim();
+
+    if (valor === "") {
+      mostrarError(email, "Complete los campos");
+      return false;
+    }
+
+    if (!valor.includes("@")) {
+      mostrarError(email, `Incluye un signo "@" en la dirección de correo electrónico. La dirección "${valor}" no incluye el signo "@".`);
+      return false;
+    }
+
+    const duplicado = usuariosRegistrados.some(u =>
+      u.email.toLowerCase() === valor.toLowerCase() && u.id !== usuarioActual.id
+    );
+    if (duplicado) {
+      mostrarError(email, "El correo electrónico ya está en uso");
+      return false;
+    }
+
+    eliminarError(email);
+    return true;
+  }
+
+  // Validación en tiempo real
+  nombre.addEventListener("input", validarNombre);
+  email.addEventListener("input", validarEmail);
+
+  form.addEventListener("submit", function (e) {
+    const esNombreValido = validarNombre();
+    const esEmailValido = validarEmail();
+
+    if (!esNombreValido || !esEmailValido) {
+      e.preventDefault();
+      return;
+    }
+
+    // Desactivar botón para evitar múltiples envíos
+    btnSubmit.disabled = true;
+    btnSubmit.style.opacity = "0.6";
+    btnSubmit.style.cursor = "not-allowed";
+    btnSubmit.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Guardando...`;
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1252 @@
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent-color: #10b981;
+            --accent-dark: #059669;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --success-color: #22c55e;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --border-radius: 12px;
+            --border-radius-lg: 16px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+             background: linear-gradient(to bottom right, #f9fafb, #eef1f5);
+            color: var(--gray-800);
+            line-height: 1.6;
+            min-height: 100vh;
+            font-size: 14px;
+        }
+
+        /* Login Styles */
+
+
+        /* Dashboard Styles */
+        .main {
+            padding: 20px;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 16px;
+            height: calc(100vh - 40px);
+        }
+
+        .cuadrante {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-100);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .cuadrante:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .cuadrante h5 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .cuadrante h5 i {
+            color: var(--primary-color);
+        }
+
+        .chart-container {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .chart-container canvas {
+            max-height: 100% !important;
+        }
+
+        /* Productos destacados styling */
+        .productos-destacados {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .producto-categoria {
+            background: var(--gray-50);
+            padding: 12px;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .producto-categoria h6 {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .producto-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .producto-item:last-child {
+            border-bottom: none;
+        }
+
+        .producto-item strong {
+            color: var(--gray-900);
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .producto-nombre {
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+        .producto-valor {
+            color: var(--gray-600);
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        /* Placeholder cuadrante */
+        .cuadrante-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--gray-400);
+        }
+
+        .cuadrante-placeholder i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--gray-300);
+        }
+
+        .cuadrante-placeholder h5 {
+            color: var(--gray-500);
+            margin-bottom: 8px;
+        }
+
+        .cuadrante-placeholder p {
+            color: var(--gray-400);
+            font-size: 14px;
+        }
+
+        /* Modal improvements */
+        .modal-content {
+            border: none;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--gray-200);
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            padding: 20px 24px;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background: var(--gray-50);
+            color: var(--gray-700);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            padding: 12px 16px;
+        }
+
+        .table td {
+            padding: 12px 16px;
+            border-color: var(--gray-200);
+            vertical-align: middle;
+        }
+
+        .table-striped > tbody > tr:nth-of-type(odd) > td {
+            background: var(--gray-50);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .login-container {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+
+            .login-image-section {
+                display: none;
+            }
+
+            .main {
+                padding: 12px;
+                height: 100vh;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, 1fr);
+                gap: 12px;
+                height: calc(100vh - 24px);
+            }
+
+            .cuadrante {
+                padding: 12px;
+            }
+
+            .cuadrante h5 {
+                font-size: 14px;
+                margin-bottom: 12px;
+            }
+
+            .chart-container {
+                min-height: 0;
+            }
+        }
+
+        /* Chart hover effects */
+        .chart-container:hover {
+            cursor: pointer;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--gray-100);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-400);
+        }
+
+.card-producto {
+  background-color: var(--gray-50);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.card-producto:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.card-icon {
+  font-size: 26px;
+  color: var(--primary-color);
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--gray-600);
+  margin: 0;
+}
+
+.card-nombre {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.card-valor {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+/* Colores por tipo */
+.top-vendido .card-icon { color: #27ae60; }
+.bottom-vendido .card-icon { color: #c0392b; }
+.top-ingresos .card-icon { color: #2980b9; }
+.bottom-ingresos .card-icon { color: #e67e22; }
+
+.grid-productos-destacados {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  flex: 1;
+}
+
+.card-producto {
+  height: 100%;
+}
+
+  .modal-body {
+    max-height: 60vh; /* Altura máxima del contenido */
+    overflow-y: auto; /* Scroll vertical si excede */
+  }
+
+  /* Opcional: ajuste del encabezado para sticky efecto */
+  .modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: inherit;
+  }
+    </style>
+</head>
+
+<% if (!user) { %>
+  <div class="login-background">
+    <div class="login-container">
+        <div class="login-form-section">
+            <div class="login-header">
+                <i class="fas fa-user-shield login-icon"></i>
+                <h1 class="login-title">Iniciar Sesión</h1>
+                <p class="login-subtitle">Ingresa tus credenciales para acceder</p>
+            </div>
+            <form action="/log-in" method="POST" class="login-form">
+                <!-- Add CSRF token -->
+                <div class="input-group">
+                    <label for="username">Usuario</label>
+                    <input id="username" name="username" placeholder="Ingresa tu usuario o email" type="text" required />
+                </div>
+                <div class="input-group">
+                    <label for="password">Contraseña</label>
+                    <input id="password" name="password" placeholder="Ingresa tu contraseña" type="password" required />
+                </div>
+                <% if (error && error !== '') { %>
+                <div class="flash-error"><%= error %></div>
+                <% } %>
+                <button type="submit" class="login-button">
+                    <i class="fas fa-sign-in-alt"></i> Ingresar
+                </button>
+            </form>
+            <div class="forgot-password-link" style="margin-top: 20px; text-align: center;">
+                <a href="/recovery/forgot-password">¿Olvidaste tu contraseña?</a>
+            </div>
+        </div>
+    </div>
+</div>
+<% } else { %>
+
+<div class="container-fluid main">
+    <div class="dashboard-grid">
+        <!-- Cuadrante 1: Ventas -->
+        <div class="cuadrante">
+            <h5><i class="fas fa-chart-line"></i>Ventas por Día (Últimos 30 días)</h5>
+            <div class="chart-container">
+                <canvas id="ventasChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Cuadrante 2: Órdenes -->
+        <div class="cuadrante">
+            <h5><i class="fas fa-box"></i>Órdenes de Reabastecimiento (Últimos 30 días)</h5>
+            <div class="chart-container">
+                <canvas id="ordenesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Cuadrante 3: Productos Destacados -->
+       <div class="cuadrante">
+        <h5><i class="fas fa-star"></i> Productos Destacados</h5>
+        <div class="grid-productos-destacados">
+
+            <!-- Más vendido -->
+            <div class="card-producto top-vendido">
+            <div class="card-icon">
+                <i class="fas fa-arrow-up"></i>
+            </div>
+            <div class="card-content">
+                <p class="card-label">Más vendido</p>
+                <p class="card-nombre"><%= rankingProductos.masVendido.nombre %></p>
+                <p class="card-valor"><%= rankingProductos.masVendido.total_vendido %> unidades</p>
+            </div>
+            </div>
+
+            <!-- Menos vendido -->
+            <div class="card-producto bottom-vendido">
+            <div class="card-icon">
+                <i class="fas fa-arrow-down"></i>
+            </div>
+            <div class="card-content">
+                <p class="card-label">Menos vendido</p>
+                <p class="card-nombre"><%= rankingProductos.menosVendido.nombre %></p>
+                <p class="card-valor"><%= rankingProductos.menosVendido.total_vendido %> unidades</p>
+            </div>
+            </div>
+
+            <!-- Más ingresos -->
+            <div class="card-producto top-ingresos">
+            <div class="card-icon">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="card-content">
+                <p class="card-label">Más ingresos</p>
+                <p class="card-nombre"><%= rankingProductos.masIngresos.nombre %></p>
+                <p class="card-valor">S/ <%= parseFloat(rankingProductos.masIngresos.total_ingresos).toFixed(2) %></p>
+            </div>
+            </div>
+
+            <!-- Menos ingresos -->
+            <div class="card-producto bottom-ingresos">
+            <div class="card-icon">
+                <i class="fas fa-hand-holding-usd"></i>
+            </div>
+            <div class="card-content">
+                <p class="card-label">Menos ingresos</p>
+                <p class="card-nombre"><%= rankingProductos.menosIngresos.nombre %></p>
+                <p class="card-valor">S/ <%= parseFloat(rankingProductos.menosIngresos.total_ingresos).toFixed(2) %></p>
+            </div>
+            </div>
+
+        </div>
+        </div>
+
+
+        <!-- Cuadrante 4: Placeholder -->
+        <div class="cuadrante">
+            <h5><i class="fas fa-exclamation-triangle"></i> Incidencias y Ajustes (Últimos 30 días)</h5>
+            <div class="chart-container">
+                <canvas id="graficoIncidenciasMermasSobrantes"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal detalle de ventas -->
+<div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: var(--primary-color); color: var(--white);">
+                <h5 class="modal-title">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Detalle de ventas - <span id="modalFecha"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                          <th>ID Movimiento</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal (S/.)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detalleBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal detalle de órdenes -->
+<div class="modal fade" id="modalOrden" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: var(--accent-color); color: var(--white);">
+                <h5 class="modal-title">
+                    <i class="fas fa-box me-2"></i>
+                    Detalle de órdenes - <span id="modalFechaOrden"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID Orden</th>
+                            <th>Proveedor</th>
+                            <th>Productos</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detalleOrdenBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDetalleIncidencias" tabindex="-1" aria-labelledby="modalDetalleLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #ff7675; color: var(--white);">
+        <h5 class="modal-title" id="modalDetalleLabel">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Detalles de Incidencias<span id="modalFechaIncidencia"></span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped table-bordered table-sm">
+          <thead>
+            <tr>
+              <th>ID Orden</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Incidencia</th>
+            </tr>
+          </thead>
+          <tbody id="tablaIncidenciasBody">
+            <!-- Aquí se cargan las filas dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal detalle de Mermas -->
+<div class="modal fade" id="modalDetalleMermas" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #fab1a0; color: var(--gray-900);">
+        <h5 class="modal-title">
+          <i class="fas fa-minus-circle me-2"></i>
+          Detalle de Mermas - <span id="modalFechaMerma"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped table-bordered table-sm">
+          <thead>
+            <tr>
+              <th>ID Movimiento</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Descripción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaMermasBody">
+            <!-- Se insertan filas dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal detalle de Sobrantes -->
+<div class="modal fade" id="modalDetalleSobrantes" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #74b9ff; color: var(--white);">
+        <h5 class="modal-title">
+          <i class="fas fa-plus-circle me-2"></i>
+          Detalle de Sobrantes - <span id="modalFechaSobrante"></span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped table-bordered table-sm">
+          <thead>
+            <tr>
+              <th>ID Movimiento</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Descripción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaSobrantesBody">
+            <!-- Se insertan filas dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script id="fechas-data" type="application/json">
+    <%- JSON.stringify(fechasVentas) %>
+</script>
+
+<script id="montos-data" type="application/json">
+    <%- JSON.stringify(montosVentas) %>
+</script>
+
+<script id="fechas-orden-data" type="application/json">
+    <%- JSON.stringify(fechasOrdenes) %>
+</script>
+
+<script id="totales-orden-data" type="application/json">
+    <%- JSON.stringify(totalesOrdenes) %>
+</script>
+
+<script id="incidencias-ajustes-data" type="application/json">
+  <%- JSON.stringify(resumenIncidenciasYMermas) %>
+</script>
+
+<script>
+
+const noDataPlugin = {
+  id: 'noDataPlugin',
+  afterDraw: (chart) => {
+    if (chart.data.datasets.every(ds => !ds.data || ds.data.length === 0 || ds.data.every(v => v === 0))) {
+      const {ctx, width, height} = chart;
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '16px Inter, sans-serif';
+      ctx.fillStyle = '#9ca3af'; // gris 400
+      ctx.fillText('No hay datos disponibles', width / 2, height / 2);
+      ctx.restore();
+    }
+  }
+};
+
+Chart.register(noDataPlugin);
+
+// Ventas Chart
+const fechasCrudas = JSON.parse(document.getElementById("fechas-data").textContent);
+const montos = JSON.parse(document.getElementById("montos-data").textContent);
+let modalCargando = false;
+
+const resumenPorFecha = {};
+fechasCrudas.forEach((fecha, index) => {
+    const date = new Date(fecha);
+    const fechaClave = date.toISOString().slice(0, 10);
+    const monto = montos[index];
+    if (monto > 0) {
+        if (resumenPorFecha[fechaClave]) {
+            resumenPorFecha[fechaClave] += monto;
+        } else {
+            resumenPorFecha[fechaClave] = monto;
+        }
+    }
+});
+
+const fechasFiltradas = Object.keys(resumenPorFecha);
+const montosFiltrados = Object.values(resumenPorFecha);
+const fechasFormateadas = fechasFiltradas.map(f => {
+    const [year, month, day] = f.split("-");
+    const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+    return `${parseInt(day)} de ${meses[parseInt(month) - 1]}`;
+});
+
+const ctx = document.getElementById('ventasChart').getContext('2d');
+const ventasChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: fechasFormateadas,
+        datasets: [{
+            label: 'Monto total (S/.)',
+            data: montosFiltrados,
+            backgroundColor: 'rgba(99, 102, 241, 0.7)',
+            borderColor: 'rgba(99, 102, 241, 1)',
+            borderWidth: 0,
+            borderRadius: 6,
+            borderSkipped: false,
+            minBarLength: 5 //fuerza una altura mínima visible
+        }]
+    },
+         options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                onClick: async (event, elements) => {
+            if (modalCargando) return; // Evita múltiples clics
+
+            if (elements.length > 0) {
+                modalCargando = true; // Bloquea nuevos clics
+                const index = elements[0].index;
+                const fechaISO = fechasFiltradas[index];
+                const fechaMostrada = fechasFormateadas[index];
+                try {
+                    await mostrarModalDetalle(fechaISO, fechaMostrada);
+                } catch (err) {
+                    console.error("Error al mostrar modal:", err);
+                }
+                modalCargando = false; // Desbloquea clics después
+            }
+        },
+        onHover: (event, chartElement) => {
+            event.native.target.style.cursor = chartElement.length ? 'pointer' : 'default';
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: 'rgba(99, 102, 241, 0.5)',
+                borderWidth: 1,
+                cornerRadius: 8,
+                displayColors: false
+            }
+        },
+        scales: {
+            y: {
+                type: 'logarithmic', // <-- Cambio aquí
+                beginAtZero: false, // <-- en log no se puede comenzar en cero
+                min: 1,             // <-- mínimo para que 0s no causen problemas
+                grid: {
+                    color: 'rgba(229, 231, 235, 0.5)',
+                    drawBorder: false
+                },
+                ticks: {
+                    color: '#6b7280',
+                    callback: function(value) {
+                        if (value >= 1000) return (value / 1000) + 'K';
+                        return value;
+                    },
+                    // Solo mostrar potencias de 10
+                    autoSkip: true,
+                    maxTicksLimit: 6, // máximo de etiquetas visibles
+                    // Este filtro evita valores no redondos
+                    filter: function(value) {
+                        const log10 = Math.log10(value);
+                        return Number.isInteger(log10); // solo potencias de 10: 1, 10, 100, 1000, etc.
+                    }
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    maxRotation: 45,
+                    minRotation: 30,
+                    autoSkip: false,
+                    color: '#6b7280'
+                }
+            }
+        }
+    }
+});
+
+// -------------------------------------------------------------------Órdenes Chart-----------------------------------------------------------------------------------
+const fechasOrdenesRaw = JSON.parse(document.getElementById("fechas-orden-data").textContent);
+const totalesOrdenes = JSON.parse(document.getElementById("totales-orden-data").textContent);
+const resumenOrdenes = {};
+fechasOrdenesRaw.forEach((fecha, index) => {
+    const date = new Date(fecha);
+    const fechaStr = date.toLocaleDateString("es-PE", {
+        timeZone: "America/Lima",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+    }).split("/").reverse().join("-"); // formato YYYY-MM-DD
+
+    resumenOrdenes[fechaStr] = (resumenOrdenes[fechaStr] || 0) + parseInt(totalesOrdenes[index] || 0);
+});
+
+const fechasOrdenes = JSON.parse(document.getElementById("fechas-orden-data").textContent);
+const cantidadesOrdenes = JSON.parse(document.getElementById("totales-orden-data").textContent);
+
+const etiquetasOrdenes = fechasOrdenes.map(f => {
+    const [y, m, d] = f.split("-");
+    const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+    return `${parseInt(d)} de ${meses[parseInt(m) - 1]}`;
+});
+
+let ordenModalCargando = false;
+const ctxOrden = document.getElementById('ordenesChart').getContext('2d');
+const ordenesChart = new Chart(ctxOrden, {
+    type: 'bar',
+    data: {
+        labels: etiquetasOrdenes,
+        datasets: [{
+            label: 'Órdenes realizadas',
+            data: cantidadesOrdenes,
+            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+            borderColor: 'rgba(16, 185, 129, 1)',
+            borderWidth: 0,
+            borderRadius: 6,
+            borderSkipped: false,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        onClick: async (event, elements) => {
+    if (ordenModalCargando) return; // Evita múltiples clics
+
+    if (elements.length > 0) {
+        ordenModalCargando = true; // Bloquea nuevos clics
+        const index = elements[0].index;
+        const fechaISO = fechasOrdenes[index];
+        const fechaMostrada = etiquetasOrdenes[index];
+        try {
+            document.body.style.cursor = 'wait';
+            await mostrarModalOrdenDetalle(fechaISO, fechaMostrada);
+        } catch (err) {
+            console.error("Error al mostrar modal de órdenes:", err);
+        } finally {
+            document.body.style.cursor = 'default';
+            ordenModalCargando = false; // Libera el bloqueo
+        }
+    }
+},
+        onHover: (event, chartElement) => {
+            event.native.target.style.cursor = chartElement.length ? 'pointer' : 'default';
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: 'rgba(16, 185, 129, 0.5)',
+                borderWidth: 1,
+                cornerRadius: 8,
+                displayColors: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(229, 231, 235, 0.5)',
+                    drawBorder: false
+                },
+                ticks: {
+                    color: '#6b7280'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    maxRotation: 45,
+                    minRotation: 30,
+                    autoSkip: false,
+                    color: '#6b7280'
+                }
+            }
+        }
+    }
+});
+
+// Modal VENTAS (unchanged)
+async function mostrarModalDetalle(fechaISO, fechaMostrada) {
+    const res = await fetch(`/ventas/detalle/${fechaISO}`);
+    const productos = await res.json();
+    
+    document.getElementById('modalFecha').textContent = fechaMostrada;
+    const body = document.getElementById('detalleBody');
+    body.innerHTML = '';
+    
+    const productosValidos = productos.filter(p => parseFloat(p.subtotal) > 0);
+    
+    if (productosValidos.length === 0) {
+        body.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No se registraron ventas válidas este día.</td></tr>`;
+    } else {
+        productosValidos.forEach(p => {
+            body.innerHTML += `
+                <tr>
+                    <td>
+                      ${p.id_movimiento
+                        ? `<a href="/movimientos/detalle/${p.id_movimiento}" class="text-primary text-decoration-underline">${p.id_movimiento}</a>`
+                        : '—'}
+                    </td> 
+                    <td>${p.nombre}</td>
+                    <td>${p.cantidad}</td>
+                    <td>S/ ${parseFloat(p.subtotal).toFixed(2)}</td>
+                </tr>
+            `;
+        });
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalDetalle'));
+    modal.show();
+}
+
+async function mostrarModalOrdenDetalle(fechaISO, fechaMostrada) {
+    const res = await fetch(`/ordenes/detalle-fecha/${fechaISO}`);
+    const ordenes = await res.json();
+    
+    const body = document.getElementById('detalleOrdenBody');
+    body.innerHTML = '';
+    document.getElementById('modalFechaOrden').textContent = fechaMostrada;
+    
+    if (!ordenes.length) {
+        body.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No se registraron órdenes este día.</td></tr>`;
+    } else {
+        ordenes.forEach(o => {
+            const productos = o.products || [];
+            let listaProductos = '<ul style="margin-bottom: 0;">';
+            productos.forEach(prod => {
+                listaProductos += `<li>${prod.nombre} (x${prod.cantidad})</li>`;
+            });
+            listaProductos += '</ul>';
+            
+            body.innerHTML += `
+                <tr>
+                    <td>
+                      ${o.id_order
+                        ? `<a href="/ordenes/detalle/${o.id_order}" class="text-primary text-decoration-underline">${o.id_order}</a>`
+                        : '—'}
+                    </td>
+                    <td>${o.proveedor}</td>
+                    <td>${listaProductos}</td>
+                    <td>${o.estado}</td>
+                </tr>
+            `;
+        });
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalOrden'));
+    modal.show();
+}
+
+  document.addEventListener("DOMContentLoaded", () => {
+  const rawData = getIncidenciasAjustesData();
+  const { labels, dataIncidencias, dataMermas, dataSobrantes } = procesarDatosGrafico(rawData);
+  const ctx = document.getElementById('graficoIncidenciasMermasSobrantes').getContext('2d');
+  inicializarGraficoIncidencias(ctx, labels, dataIncidencias, dataMermas, dataSobrantes);
+});
+
+/** Obtiene y parsea los datos desde el script embebido en HTML */
+function getIncidenciasAjustesData() {
+  const raw = document.getElementById("incidencias-ajustes-data").textContent;
+  return JSON.parse(raw);
+}
+
+/** Separa los datos por tipo para pasarlos al gráfico */
+function procesarDatosGrafico(data) {
+  const labels = data.map(item => item.fecha);
+  const dataIncidencias = data.map(item => item.incidencias || 0);
+  const dataMermas = data.map(item => item.mermas || 0);
+  const dataSobrantes = data.map(item => item.sobrantes || 0);
+  return { labels, dataIncidencias, dataMermas, dataSobrantes };
+}
+
+function formatearFechasLabels(labels) {
+  return labels.map(fechaISO => {
+    const fecha = new Date(fechaISO + "T00:00:00-05:00"); // fuerza Lima
+    return fecha.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
+  });
+}
+
+let cargandoIncidencias = false;
+let cargandoMermas = false;
+let cargandoSobrantes = false;
+
+function inicializarGraficoIncidencias(ctx, labelsOriginales, dataIncidencias, dataMermas, dataSobrantes) {
+  const labelsFormateadas = formatearFechasLabels(labelsOriginales);
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labelsFormateadas,
+      datasets: [
+        {
+          label: 'Incidencias',
+          data: dataIncidencias,
+          backgroundColor: '#ff7675',
+          borderRadius: 6,
+          borderSkipped: false
+        },
+        {
+          label: 'Mermas',
+          data: dataMermas,
+          backgroundColor: '#fab1a0',
+          borderRadius: 6,
+          borderSkipped: false
+        },
+        {
+          label: 'Sobrantes',
+          data: dataSobrantes,
+          backgroundColor: '#74b9ff',
+          borderRadius: 6,
+          borderSkipped: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      onClick: async function (event, elements) {
+  if (elements.length > 0) {
+    const element = elements[0];
+    const datasetIndex = element.datasetIndex;
+    const tipo = this.data.datasets[datasetIndex].label;
+    const fechaISO = labelsOriginales[element.index];
+    const fechaMostrada = labelsFormateadas[element.index];
+
+    try {
+      document.body.style.cursor = 'wait';
+
+      if (tipo === "Incidencias") {
+        if (cargandoIncidencias) return;
+        cargandoIncidencias = true;
+        await abrirModalIncidencias(fechaISO, fechaMostrada);
+        cargandoIncidencias = false;
+
+      } else if (tipo === "Mermas") {
+        if (cargandoMermas) return;
+        cargandoMermas = true;
+        await abrirModalMermas(fechaISO, fechaMostrada);
+        cargandoMermas = false;
+
+      } else if (tipo === "Sobrantes") {
+        if (cargandoSobrantes) return;
+        cargandoSobrantes = true;
+        await abrirModalSobrantes(fechaISO, fechaMostrada);
+        cargandoSobrantes = false;
+      }
+
+    } catch (err) {
+      console.error("Error al abrir modal:", err);
+    } finally {
+      document.body.style.cursor = 'default';
+    }
+  }
+},
+      onHover: (event, elements) => {
+        event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        tooltip: {
+          backgroundColor: 'rgba(17, 24, 39, 0.95)',
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          borderColor: 'rgba(99, 102, 241, 0.5)',
+          borderWidth: 1,
+          cornerRadius: 8,
+          displayColors: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(229, 231, 235, 0.5)',
+            drawBorder: false
+          },
+          ticks: {
+            color: '#6b7280'
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          },
+          ticks: {
+            maxRotation: 45,
+            minRotation: 30,
+            autoSkip: false,
+            color: '#6b7280'
+          }
+        }
+      }
+    }
+  });
+}
+
+async function abrirModalIncidencias(fecha) {
+  try {
+    const res = await fetch(`/incidencias/drill/${fecha}`);
+    const data = await res.json();
+
+    const tbody = document.getElementById("tablaIncidenciasBody");
+    tbody.innerHTML = "";
+
+    if (!Array.isArray(data) || data.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='4'>No se encontraron incidencias.</td></tr>";
+    } else {
+      data.forEach(incidencia => {
+        const { id_orden, detalle_productos } = incidencia;
+        detalle_productos.forEach(producto => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>
+              ${id_orden
+                ? `<a href="/ordenes/detalle/${id_orden}" class="text-primary text-decoration-underline">${id_orden}</a>`
+                : '—'}
+            </td>
+            <td>${producto.nombre}</td>
+            <td>${producto.cantidad}</td>
+            <td>${producto.incidencia}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('modalDetalleIncidencias'));
+    modal.show();
+  } catch (error) {
+    console.error("❌ Error al cargar incidencias:", error);
+    const tbody = document.getElementById("tablaIncidenciasBody");
+    tbody.innerHTML = "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
+  }
+}
+
+function cerrarModal() {
+  document.getElementById("modalDetalles").style.display = "none";
+}
+
+async function abrirModalMermas(fecha) {
+  try {
+    document.getElementById("modalFechaMerma").textContent = fecha;
+
+    const res = await fetch(`/movimientos/drill/mermas/${fecha}`);
+    const data = await res.json();
+
+    const tbody = document.getElementById("tablaMermasBody");
+    tbody.innerHTML = "";
+
+    if (!Array.isArray(data) || data.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='4'>No se encontraron mermas.</td></tr>";
+    } else {
+      data.forEach(m => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>
+            ${m.id_movimiento
+              ? `<a href="/movimientos/detalle/${m.id_movimiento}" class="text-primary text-decoration-underline">${m.id_movimiento}</a>`
+              : '—'}
+          </td>          
+          <td>${m.nombre_producto}</td>
+          <td>${m.cantidad}</td>
+          <td>${m.descripcion || '—'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    new bootstrap.Modal(document.getElementById('modalDetalleMermas')).show();
+  } catch (err) {
+    console.error("❌ Error al cargar mermas:", err);
+    document.getElementById("tablaMermasBody").innerHTML =
+      "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
+  }
+}
+
+async function abrirModalSobrantes(fecha) {
+  try {
+    document.getElementById("modalFechaSobrante").textContent = fecha;
+
+    const res = await fetch(`/movimientos/drill/sobrantes/${fecha}`);
+    const data = await res.json();
+
+    const tbody = document.getElementById("tablaSobrantesBody");
+    tbody.innerHTML = "";
+
+    if (!Array.isArray(data) || data.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='4'>No se encontraron sobrantes.</td></tr>";
+    } else {
+      data.forEach(s => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>
+            ${s.id_movimiento
+              ? `<a href="/movimientos/detalle/${s.id_movimiento}" class="text-primary text-decoration-underline">${s.id_movimiento}</a>`
+              : '—'}
+          </td> 
+          <td>${s.nombre_producto}</td>
+          <td>${s.cantidad}</td>
+          <td>${s.descripcion || '—'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    new bootstrap.Modal(document.getElementById('modalDetalleSobrantes')).show();
+  } catch (err) {
+    console.error("❌ Error al cargar sobrantes:", err);
+    document.getElementById("tablaSobrantesBody").innerHTML =
+      "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
+  }
+}
+</script>
+
+<% } %>

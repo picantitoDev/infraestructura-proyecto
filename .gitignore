@@ -1,0 +1,51 @@
+# --- Node.js / Express ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# --- Entornos ---
+.env
+.env.*
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Builds / artefactos generados ---
+dist/
+build/
+coverage/
+*.lcov
+.nyc_output
+
+# --- Prisma ---
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# --- Uploads locales ---
+uploads/
+public/uploads/
+
+# --- Sistema / Editor ---
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Backups ---
+*.bak
+*.backup
+
+# --- Terraform (IaC) ---
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# --- Ansible (IaC) ---
+*.retry

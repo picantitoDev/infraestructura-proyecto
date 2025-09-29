@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicon/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <title>Proveedores</title>
+    <link rel="stylesheet" href="listarProveedores.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+    <body>
+  <div class="container">
+    <header class="header">
+      <h1 class="titulo">
+        <i class="fas fa-truck"></i> Lista de Proveedores
+      </h1>
+
+      <% if (user.rol === 'Admin') { %>
+        <a href="/proveedores/nuevo" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Nuevo Proveedor
+        </a>
+      <% } else { %>
+        <a class="btn btn-primary" style="pointer-events: none; opacity: 0.5;" title="Solo para administradores">
+          <i class="fas fa-plus"></i> Nuevo Proveedor
+        </a>
+      <% } %>
+    </header>
+
+    <div class="tabla-contenedor">
+      <table class="tabla-proveedores">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Razón Social</th>
+            <th>RUC</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Dirección</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% proveedores.forEach(function(proveedor) { %>
+          <tr>
+            <td><%= proveedor.id_proveedor %></td>
+            <td><strong><%= proveedor.razon_social %></strong></td>
+            <td><%= proveedor.ruc %></td>
+            <td><%= proveedor.numero_telefono %></td>
+            <td>
+              <a href="mailto:<%= proveedor.correo %>"><%= proveedor.correo %></a>
+            </td>
+            <td><%= proveedor.direccion %></td>
+            <td>
+              <div class="acciones">
+                <% if (user.rol === 'Admin') { %>
+                  <a
+                    href="/proveedores/editar/<%= proveedor.id_proveedor %>"
+                    class="btn-icon editar"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </a>
+                <% } else { %>
+                  <span class="btn-icon editar" style="opacity: 0.4; pointer-events: none;" title="Solo para administradores">
+                    <i class="fas fa-edit"></i>
+                  </span>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+
+</html>

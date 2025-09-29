@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Proveedor</title>
+    <link rel="stylesheet" href="/detalleProveedor.css">
+    <style>
+              .error-msg {
+        color: red;
+        font-size: 0.9em;
+        margin-top: 4px;
+      }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Form Container -->
+        <div class="form-container">
+                            <a href="/proveedores" class="back-btn">
+                <span class="back-arrow">← Atrás</span>
+                </a>
+            <div class="form-header">
+                <h2 class="form-title">Editar Proveedor</h2>
+                <p class="form-subtitle">Actualiza la información del proveedor seleccionado</p>
+            </div>
+
+            <form action="/proveedores/<%= proveedor.id_proveedor %>?_method=PUT" method="POST" id="supplierForm">
+                <div class="form-group">
+                    <label for="razon_social" class="form-label required">Razón Social</label>
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="razon_social"
+                            name="razon_social" 
+                            class="form-input"
+                            value="<%= proveedor.razon_social %>" 
+                            required 
+                            placeholder="Ingrese la razón social"
+                        />
+                        <div id="razon-error" class="error-msg"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ruc" class="form-label required">RUC</label>
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="ruc"
+                            name="ruc" 
+                            class="form-input"
+                            value="<%= proveedor.ruc %>" 
+                            required 
+                            placeholder="Ingrese el RUC"
+                            pattern="[0-9]{11}"
+                            title="El RUC debe tener 11 dígitos"
+                        />
+                        <div id="ruc-error" class="error-msg"></div>
+
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="numero_telefono" class="form-label required">Teléfono</label>
+                    <div class="input-group">
+                        <input 
+                            type="tel" 
+                            id="numero_telefono"
+                            name="numero_telefono" 
+                            class="form-input"
+                            value="<%= proveedor.numero_telefono %>" 
+                            required 
+                            placeholder="Ingrese el número de teléfono"
+                        />
+                        <div id="telefono-error" class="error-msg"></div>
+
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="correo" class="form-label required">Correo Electrónico</label>
+                    <div class="input-group">
+                        <input 
+                            type="email" 
+                            id="correo"
+                            name="correo" 
+                            class="form-input"
+                            value="<%= proveedor.correo %>" 
+                            required 
+                            placeholder="Ingrese el correo electrónico"
+                        />
+                    </div>
+                    <div id="correo-error" class="error-msg"></div>
+
+                </div>
+
+                <div class="form-group">
+                    <label for="direccion" class="form-label required">Dirección</label>
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="direccion"
+                            name="direccion" 
+                            class="form-input"
+                            value="<%= proveedor.direccion %>" 
+                            required 
+                            placeholder="Ingrese la dirección completa"
+                        />
+                    </div>
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script id="proveedores-data" type="application/json">
+      <%- JSON.stringify(proveedores) %>
+    </script>
+
+   <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const proveedores = JSON.parse(document.getElementById("proveedores-data").textContent);
+  const proveedorActualId = "<%= proveedor.id_proveedor %>";
+
+  const form = document.getElementById("supplierForm");
+  const submitBtn = document.getElementById("submitBtn");
+
+  const razonInput = document.getElementById("razon_social");
+  const rucInput = document.getElementById("ruc");
+  const telefonoInput = document.getElementById("numero_telefono");
+  const correoInput = document.getElementById("correo");
+
+  const razonError = document.getElementById("razon-error");
+  const rucError = document.getElementById("ruc-error");
+  const telefonoError = document.getElementById("telefono-error");
+  const correoError = document.getElementById("correo-error");
+
+  const tocados = {
+    razon: false,
+    ruc: false,
+    telefono: false,
+    correo: false
+  };
+
+  function validarRucPeru(ruc) {
+    return /^[12]0\d{9}$/.test(ruc);
+  }
+
+  function validarTelefonoPeru(numero) {
+    return /^(9\d{8}|01\d{7}|0[2-8]\d{7})$/.test(numero);
+  }
+
+  function validarEmail(correo) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
+  }
+
+  function validarCampo(campo) {
+    const razon = razonInput.value.trim().toLowerCase();
+    const ruc = rucInput.value.trim();
+    const telefono = telefonoInput.value.trim();
+    const correo = correoInput.value.trim().toLowerCase();
+
+    // Razón Social
+    if (campo === "razon" && tocados.razon) {
+      const duplicado = proveedores.some(p =>
+        p.razon_social.toLowerCase() === razon && p.id_proveedor !== parseInt(proveedorActualId)
+      );
+      razonError.textContent = duplicado ? "Esta razón social ya está registrada." : "";
+    }
+
+    // RUC
+    if (campo === "ruc" && tocados.ruc) {
+      const duplicado = proveedores.some(p =>
+        p.ruc === ruc && p.id_proveedor !== parseInt(proveedorActualId)
+      );
+      if (!validarRucPeru(ruc)) {
+        rucError.textContent = "RUC inválido. Debe comenzar con 10 o 20 y tener 11 dígitos.";
+      } else if (duplicado) {
+        rucError.textContent = "Este RUC ya está registrado.";
+      } else {
+        rucError.textContent = "";
+      }
+    }
+
+    // Teléfono
+    if (campo === "telefono" && tocados.telefono) {
+      const duplicado = proveedores.some(p =>
+        p.numero_telefono === telefono && p.id_proveedor !== parseInt(proveedorActualId)
+      );
+      if (!validarTelefonoPeru(telefono)) {
+        telefonoError.textContent = "Número inválido. Use móvil (9...) o fijo (01..., 07...).";
+      } else if (duplicado) {
+        telefonoError.textContent = "Este teléfono ya está registrado.";
+      } else {
+        telefonoError.textContent = "";
+      }
+    }
+
+    // Correo
+    if (campo === "correo" && tocados.correo) {
+      const duplicado = proveedores.some(p =>
+        p.correo.toLowerCase() === correo && p.id_proveedor !== parseInt(proveedorActualId)
+      );
+      if (!validarEmail(correo)) {
+        correoError.textContent = "Correo inválido.";
+      } else if (duplicado) {
+        correoError.textContent = "Este correo ya está registrado.";
+      } else {
+        correoError.textContent = "";
+      }
+    }
+
+    // Desactivar botón si hay errores
+    const hayErrores =
+      razonError.textContent ||
+      rucError.textContent ||
+      telefonoError.textContent ||
+      correoError.textContent;
+
+    submitBtn.disabled = !!hayErrores;
+    submitBtn.style.opacity = !!hayErrores ? "0.5" : "1";
+    submitBtn.style.cursor = !!hayErrores ? "not-allowed" : "pointer";
+  }
+
+  // Listeners
+  razonInput.addEventListener("input", () => {
+    tocados.razon = true;
+    validarCampo("razon");
+  });
+
+  rucInput.addEventListener("input", () => {
+    tocados.ruc = true;
+    rucInput.value = rucInput.value.replace(/\D/g, '').slice(0, 11);
+    validarCampo("ruc");
+  });
+
+  telefonoInput.addEventListener("input", () => {
+    tocados.telefono = true;
+    telefonoInput.value = telefonoInput.value.replace(/\D/g, '');
+    validarCampo("telefono");
+  });
+
+  correoInput.addEventListener("input", () => {
+    tocados.correo = true;
+    validarCampo("correo");
+  });
+
+  form.addEventListener("submit", e => {
+    Object.keys(tocados).forEach(k => tocados[k] = true);
+
+    validarCampo("razon");
+    validarCampo("ruc");
+    validarCampo("telefono");
+    validarCampo("correo");
+
+    const hayErrores =
+      razonError.textContent ||
+      rucError.textContent ||
+      telefonoError.textContent ||
+      correoError.textContent;
+
+    if (hayErrores) {
+      e.preventDefault();
+      return;
+    }
+
+    submitBtn.textContent = "Guardando...";
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = "0.6";
+    submitBtn.style.cursor = "not-allowed";
+  });
+});
+</script>
+</body>
+</html>

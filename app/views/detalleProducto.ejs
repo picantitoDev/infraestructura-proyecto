@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="shortcut icon" href="/favicon/favicon.ico">
+    <title>Editar Producto</title>
+    <link rel="stylesheet" href="/detalleProducto.css" />
+    <style>
+      .error-msg {
+        color: red;
+        font-size: 0.9em;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a href="/productos">← Atrás</a>
+
+      <h1>Editar Producto</h1>
+
+      <form id="producto-form" action="/productos/detalle/<%= producto.id_producto %>?_method=PUT" method="POST">
+        <!-- Nombre -->
+        <div>
+          <label>Nombre:</label>
+          <input 
+            id="nombre"
+            type="text" 
+            name="nombre" 
+            value="<%= producto.nombre %>" 
+            required 
+          />
+          <div id="nombre-error" class="error-msg"></div>
+        </div>
+
+        <!-- Stock -->
+        <div>
+          <label>Stock:</label>
+          <input id="stock" type="number" min="1" name="stock" value="<%= producto.stock %>" required />
+        </div>
+
+        <!-- Precio Unitario -->
+        <div>
+          <label>Precio Unitario (S/.):</label>
+          <input 
+            type="number" 
+            min="0.10" 
+            step="0.10" 
+            id="precio_unitario"
+            name="precio_unitario" 
+            value="<%= producto.precio_unitario %>" 
+            required 
+            <%= usuario.rol === 'Usuario' ? 'disabled' : '' %>
+          />
+          <% if (usuario.rol === 'Usuario') { %>
+            <input type="hidden" name="precio_unitario" value="<%= producto.precio_unitario %>">
+          <% } %>
+        </div>
+
+        <!-- Categoría -->
+        <div>
+          <label>Categoría:</label>
+          <select name="id_categoria" required>
+            <% categorias.forEach((cat) => { %>
+              <option value="<%= cat.id_categoria %>" <% if (cat.id_categoria === producto.id_categoria) { %> selected <% } %>><%= cat.nombre %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Proveedor -->
+        <div>
+          <label>Proveedor:</label>
+          <select name="id_proveedor" required>
+            <% proveedores.forEach((prov) => { %>
+              <option value="<%= prov.id_proveedor %>" <% if (prov.id_proveedor === producto.id_proveedor) { %> selected <% } %>><%= prov.razon_social %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Cantidad Mínima -->
+        <div>
+          <label>Cantidad Mínima:</label>
+          <input id="cantidad_minima" type="number" name="cantidad_minima" step="1" min="1" value="<%= producto.cantidad_minima %>" required />
+        </div>
+
+        <!-- Estado -->
+        <div>
+          <label>Estado:</label>
+          <select name="estado">
+            <option value="Activado" <%= producto.estado === 'Activado' ? 'selected' : '' %>>Activado</option>
+            <option value="Desactivado" 
+              <%= producto.estado === 'Desactivado' ? 'selected' : '' %>
+              <%= ordenAsociada ? 'disabled' : '' %>
+            >Desactivado</option>
+          </select>
+        </div>
+
+        <% if (ordenAsociada) { %>
+  <div class="alert alert-warning mt-2">
+    ⚠ Este producto forma parte de una orden de reabastecimiento en curso
+    (ID:
+    <a href="/ordenes/detalle/<%= ordenAsociada.id_orden %>" class="fw-bold text-decoration-underline">
+      <%= ordenAsociada.id_orden %>
+    </a>). No se puede desactivar mientras la orden esté activa.
+  </div>
+<% } %>
+
+        <!-- Submit -->
+        <button type="submit" id="submit-btn">Guardar</button>
+      </form>
+    </div>
+
+    <!-- Datos JSON -->
+    <script id="productos-data" type="application/json"><%- JSON.stringify(productos) %></script>
+    <script id="producto-data" type="application/json"><%- JSON.stringify(producto) %></script>
+
+    <!-- Validación JS -->
+<script>
+  const productos = JSON.parse(document.getElementById("productos-data").textContent);
+  const productoData = JSON.parse(document.getElementById("producto-data").textContent);
+  const productoIdActual = Number(productoData.id_producto);
+  const nombreInput = document.getElementById("nombre");
+  const nombreError = document.getElementById("nombre-error");
+  const submitBtn = document.getElementById("submit-btn");
+
+  // Acepta letras con tildes, números, espacios, comas, puntos, apóstrofes y guiones
+  const regexNombreValido = /^(?=.*[\p{L}])[ \p{L}0-9,.'’\-]+$/u;
+
+  function verificarNombre(nombre) {
+    const nombreNormalizado = nombre.trim().toLowerCase();
+    return productos.some((p) => {
+      const id = Number(p.id_producto);
+      return id !== productoIdActual && p.nombre.toLowerCase() === nombreNormalizado;
+    });
+  }
+
+  function validarNombre() {
+    const nombre = nombreInput.value.trim();
+
+    if (nombre === "") {
+      nombreError.textContent = "";
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = 0.5;
+      return;
+    }
+
+    if (!regexNombreValido.test(nombre)) {
+      nombreError.textContent = "Debe contener al menos una letra. Se permiten letras, números, comas, puntos, apóstrofes y guiones.";
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = 0.5;
+      return;
+    }
+
+    if (verificarNombre(nombre)) {
+      nombreError.textContent = "Este producto ya existe.";
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = 0.5;
+      return;
+    }
+
+    nombreError.textContent = "";
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = 1;
+  }
+
+  nombreInput.addEventListener("input", validarNombre);
+
+  // Solo validamos al cargar si el campo está editable
+  window.addEventListener("DOMContentLoaded", () => {
+    if (!nombreInput.disabled) {
+      validarNombre();
+    } else {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = 1;
+    }
+  });
+</script>
+  </body>
+</html>

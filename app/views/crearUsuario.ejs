@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicon/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <title>Registrar Usuario</title>
+    <link rel="stylesheet" href="/crearUsuario.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+  </head>
+  <body class="usuario-bg">
+    <div class="usuario-wrapper">
+      <a href="/usuarios" class="volver-enlace">← Atrás</a>
+      <div class="usuario-header">
+        <i class="fas fa-user-plus icono-usuario"></i>
+        <h1 class="titulo-usuario">Crear Usuario</h1>
+        <p class="subtitulo-usuario">Registra un nuevo usuario en el sistema</p>
+      </div>
+
+      <form action="/usuarios/nuevo" method="POST" class="formulario-usuario">
+        <div class="grupo-campo">
+          <label for="username"><i class="fas fa-user"></i>Nombre</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Nombre completo"
+            required
+          />
+        </div>
+
+        <div class="grupo-campo">
+          <label for="email"><i class="fas fa-envelope"></i>Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Correo electrónico"
+            required
+          />
+        </div>
+
+<div class="grupo-campo">
+  <label for="password"><i class="fas fa-lock"></i>Contraseña</label>
+
+  <div style="position: relative; display: flex; align-items: center;">
+    <input
+      type="password"
+      id="password"
+      name="password"
+      placeholder="Contraseña segura"
+      required
+      style="width: 100%; padding-right: 40px;"
+    />
+    <i
+      class="fas fa-eye toggle-password"
+      id="togglePassword"
+      style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"
+    ></i>
+  </div>
+
+  <small class="error-texto" style="color: red; display: none;"></small>
+  <small id="password-strength" style="display: block; margin-top: 4px; color: gray;"></small>
+</div>
+
+        <div class="grupo-campo">
+          <label for="rol"><i class="fas fa-user-tag"></i>Rol</label>
+          <select id="rol" name="rol" required class="selector-rol">
+            <option value="Usuario">Usuario</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-guardar-usuario">
+          <i class="fas fa-save"></i>Crear Usuario
+        </button>
+      </form>
+    </div>
+<script id="usuarios-data" type="application/json">
+    <%- JSON.stringify(usuarios) %>
+</script>
+
+
+<script>
+  // 1. Inyectamos los usuarios al JS del lado cliente
+  const usuariosRegistrados = JSON.parse(document.getElementById("usuarios-data").textContent);
+  // 2. Ya tienes estos elementos:
+  const form = document.querySelector(".formulario-usuario");
+  const nombre = document.getElementById("username");
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const btnSubmit = document.querySelector(".btn-guardar-usuario");
+
+document.getElementById("togglePassword").addEventListener("click", function () {
+  const tipo = password.getAttribute("type") === "password" ? "text" : "password";
+  password.setAttribute("type", tipo);
+  this.classList.toggle("fa-eye");
+  this.classList.toggle("fa-eye-slash");
+});
+
+// Evaluar nivel de seguridad visualmente
+function evaluarFortaleza(valor) {
+  const strengthText = document.getElementById("password-strength");
+  let puntos = 0;
+
+  if (valor.length >= 8) puntos++;
+  if (/[A-Z]/.test(valor)) puntos++;
+  if (/\d/.test(valor)) puntos++;
+  if (/[^A-Za-z0-9]/.test(valor)) puntos++;
+
+  switch (puntos) {
+    case 0:
+    case 1:
+      strengthText.textContent = "Nivel: Débil";
+      strengthText.style.color = "red";
+      break;
+    case 2:
+    case 3:
+      strengthText.textContent = "Nivel: Media";
+      strengthText.style.color = "orange";
+      break;
+    case 4:
+      strengthText.textContent = "Nivel: Fuerte";
+      strengthText.style.color = "green";
+      break;
+  }
+}
+
+// Validación avanzada sin bloquear la original
+password.addEventListener("input", () => {
+  let valor = password.value;
+
+  // No permitir espacios (ni al escribir ni al pegar)
+  if (valor.includes(" ")) {
+    valor = valor.replace(/\s/g, "");
+    password.value = valor;
+  }
+
+  evaluarFortaleza(valor);
+
+  const errorElemento = password.parentElement.parentElement.querySelector(".error-texto");
+
+  if (valor.length < 8) {
+    errorElemento.textContent = "Debe tener al menos 8 caracteres";
+    errorElemento.style.display = "block";
+  } else if (!/[A-Z]/.test(valor)) {
+    errorElemento.textContent = "Debe contener al menos una letra mayúscula";
+    errorElemento.style.display = "block";
+  } else if (!/\d/.test(valor)) {
+    errorElemento.textContent = "Debe contener al menos un número";
+    errorElemento.style.display = "block";
+  } else if (!/[^A-Za-z0-9]/.test(valor)) {
+    errorElemento.textContent = "Debe contener al menos un carácter especial";
+    errorElemento.style.display = "block";
+  } else {
+    errorElemento.style.display = "none";
+  }
+});
+
+  function mostrarError(input, mensaje) {
+    eliminarError(input);
+    const error = document.createElement("small");
+    error.className = "error-texto";
+    error.style.color = "red";
+    error.textContent = mensaje;
+    input.parentElement.appendChild(error);
+  }
+
+  function eliminarError(input) {
+    const error = input.parentElement.querySelector(".error-texto");
+    if (error) error.remove();
+  }
+
+  function validarNombre() {
+    const valor = nombre.value.trim();
+    const regex = /^[a-zA-ZÀ-ÿ\s]+$/;
+
+    if (valor === "") {
+      mostrarError(nombre, "Complete los campos");
+      return false;
+    }
+
+    if (!regex.test(valor)) {
+      mostrarError(nombre, "El nombre contiene caracteres inválidos");
+      return false;
+    }
+
+    const yaExiste = usuariosRegistrados.some(u => u.username.toLowerCase() === valor.toLowerCase());
+    if (yaExiste) {
+      mostrarError(nombre, "El nombre de usuario ya existe");
+      return false;
+    }
+
+    eliminarError(nombre);
+    return true;
+  }
+
+  function validarEmail() {
+    const valor = email.value.trim();
+    if (valor === "") {
+      mostrarError(email, "Complete los campos");
+      return false;
+    }
+
+    if (!valor.includes("@")) {
+      mostrarError(email, `Incluye un signo "@" en la dirección de correo electrónico. La dirección "${valor}" no incluye el signo "@".`);
+      return false;
+    }
+
+    const yaRegistrado = usuariosRegistrados.some(u => u.email.toLowerCase() === valor.toLowerCase());
+    if (yaRegistrado) {
+      mostrarError(email, "El correo electrónico ya está en uso");
+      return false;
+    }
+
+    eliminarError(email);
+    return true;
+  }
+
+  function validarPassword() {
+  const valor = password.value;
+
+  // Verifica que no esté vacío o solo espacios
+  if (valor.trim() === "") {
+    return false;
+  }
+
+  // Verifica que no haya espacios
+  if (/\s/.test(valor)) {
+    return false;
+  }
+
+  // Verifica longitud mínima
+  if (valor.length < 8) {
+    return false;
+  }
+
+  // Verifica mayúscula
+  if (!/[A-Z]/.test(valor)) {
+    return false;
+  }
+
+  // Verifica número
+  if (!/\d/.test(valor)) {
+    return false;
+  }
+
+  // Verifica carácter especial
+  if (!/[^A-Za-z0-9]/.test(valor)) {
+    return false;
+  }
+
+  eliminarError(password);
+  return true;
+}
+
+
+  // Validar en tiempo real
+  nombre.addEventListener("input", validarNombre);
+  email.addEventListener("input", validarEmail);
+  password.addEventListener("input", validarPassword);
+
+  // Validar al enviar
+form.addEventListener("submit", function (e) {
+  const esNombreValido = validarNombre();
+  const esEmailValido = validarEmail();
+  const esPasswordValido = validarPassword();
+
+  if (!esNombreValido || !esEmailValido || !esPasswordValido) {
+    e.preventDefault();
+    return;
+  }
+
+  // Bloquear botón para evitar múltiples envíos
+  btnSubmit.disabled = true;
+  btnSubmit.style.opacity = "0.6"; // Reducir opacidad
+  btnSubmit.style.cursor = "not-allowed"; // Cambiar cursor
+  btnSubmit.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Registrando...`;
+});
+</script>
+
+
+  </body>
+</html>
