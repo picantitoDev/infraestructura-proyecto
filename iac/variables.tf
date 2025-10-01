@@ -8,3 +8,8 @@ variable "proxmox_api_token" {
   type        = string
   sensitive   = true
 }
+
+variable "ansible_pub_key" {
+  description = "Clave pública SSH de Ansible"
+  type        = string
+}
