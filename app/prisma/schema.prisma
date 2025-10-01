@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model auditoria_producto {
+  id_auditoria       Int      @id @default(autoincrement())
+  id_producto        Int
+  id_usuario         Int
+  accion             String
+  campos_modificados Json
+  fecha              DateTime @default(now()) @db.Timestamp(6)
+  producto           producto @relation(fields: [id_producto], references: [id_producto], onDelete: NoAction, onUpdate: NoAction)
+  usuarios           usuarios @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model categoria {
+  id_categoria Int        @id @default(autoincrement())
+  nombre       String     @db.VarChar(55)
+  estado       String     @default("activa") @db.VarChar(10)
+  producto     producto[]
+}
+
+model cliente {
+  id_cliente        Int                @id @default(autoincrement())
+  nombre_cliente    String?            @db.VarChar(100)
+  razon_social      String?            @db.VarChar(100)
+  dni_cliente       String?            @unique @db.VarChar(15)
+  ruc_cliente       String?            @unique @db.VarChar(20)
+  direccion_cliente String?            @db.VarChar(150)
+  correo_cliente    String?            @db.VarChar(100)
+  movimiento_venta  movimiento_venta[]
+}
+
+model incidencia {
+  id_incidencia          Int                     @id @default(autoincrement())
+  id_movimiento          Int
+  descripcion_general    String?
+  detalle_productos      Json?
+  fecha_registro         DateTime?               @default(now()) @db.Timestamp(6)
+  id_orden               Int?
+  fecha                  DateTime?               @default(now()) @db.Timestamp(6)
+  movimiento             movimiento              @relation(fields: [id_movimiento], references: [id_movimiento], onDelete: Cascade, onUpdate: NoAction, map: "fk_movimiento")
+  orden_reabastecimiento orden_reabastecimiento? @relation(fields: [id_orden], references: [id_order], onUpdate: NoAction, map: "fk_orden_reabastecimiento")
+}
+
+model movimiento {
+  id_movimiento       Int                   @id @default(autoincrement())
+  id_usuario          Int
+  tipo                String                @db.VarChar(50)
+  fecha               DateTime              @db.Timestamp(6)
+  descripcion         String?
+  incidencia          incidencia[]
+  usuarios            usuarios              @relation(fields: [id_usuario], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_usuario")
+  movimiento_ajuste   movimiento_ajuste?
+  movimiento_entrada  movimiento_entrada?
+  movimiento_venta    movimiento_venta?
+  producto_movimiento producto_movimiento[]
+}
+
+model movimiento_ajuste {
+  id_movimiento Int        @id
+  tipo_ajuste   String?    @db.VarChar(255)
+  motivo        String?
+  movimiento    movimiento @relation(fields: [id_movimiento], references: [id_movimiento], onDelete: Cascade, onUpdate: NoAction, map: "fk_movimiento")
+}
+
+model movimiento_entrada {
+  id_movimiento          Int                     @id
+  id_proveedor           Int?
+  total                  Decimal?                @db.Decimal(10, 2)
+  id_orden               Int?
+  movimiento             movimiento              @relation(fields: [id_movimiento], references: [id_movimiento], onDelete: Cascade, onUpdate: NoAction, map: "fk_movimiento")
+  proveedor              proveedor?              @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: Cascade, onUpdate: NoAction, map: "fk_proveedor")
+  orden_reabastecimiento orden_reabastecimiento? @relation(fields: [id_orden], references: [id_order], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model movimiento_venta {
+  id_movimiento    Int        @id
+  id_cliente       Int?
+  total            Decimal?   @db.Decimal(12, 2)
+  tipo_comprobante String?    @db.VarChar(50)
+  serie            String?    @db.VarChar(10)
+  correlativo      Int?
+  cliente          cliente?   @relation(fields: [id_cliente], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction)
+  movimiento       movimiento @relation(fields: [id_movimiento], references: [id_movimiento], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model orden_reabastecimiento {
+  id_order           Int                  @id @default(autoincrement())
+  id_proveedor       Int
+  products           Json?                @db.Json
+  fecha              DateTime             @default(now()) @db.Timestamptz(6)
+  estado             String               @default("en_curso")
+  id_usuario         Int?
+  incidencia         incidencia[]
+  movimiento_entrada movimiento_entrada[]
+  proveedor          proveedor            @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: Cascade, onUpdate: NoAction, map: "fk_proveedor")
+  usuarios           usuarios?            @relation(fields: [id_usuario], references: [id], onUpdate: NoAction, map: "fk_usuario")
+}
+
+model producto {
+  id_producto         Int                   @id @default(autoincrement())
+  id_proveedor        Int
+  id_categoria        Int
+  nombre              String                @db.VarChar(255)
+  cantidad_minima     Int
+  stock               Int
+  estado              String?               @db.VarChar(50)
+  precio_unitario     Decimal               @db.Decimal(10, 2)
+  auditoria_producto  auditoria_producto[]
+  categoria           categoria             @relation(fields: [id_categoria], references: [id_categoria], onDelete: Cascade, onUpdate: NoAction, map: "fk_categoria")
+  proveedor           proveedor             @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: Cascade, onUpdate: NoAction, map: "fk_proveedor")
+  producto_movimiento producto_movimiento[]
+}
+
+model producto_movimiento {
+  id_movimiento   Int
+  id_producto     Int
+  cantidad        Int
+  subtotal        Decimal    @db.Decimal(10, 2)
+  precio_unitario Decimal    @db.Decimal(10, 2)
+  movimiento      movimiento @relation(fields: [id_movimiento], references: [id_movimiento], onDelete: Cascade, onUpdate: NoAction, map: "fk_movimiento")
+  producto        producto   @relation(fields: [id_producto], references: [id_producto], onDelete: Cascade, onUpdate: NoAction, map: "fk_producto")
+
+  @@id([id_movimiento, id_producto])
+}
+
+model proveedor {
+  id_proveedor           Int                      @id @default(autoincrement())
+  razon_social           String                   @db.VarChar(255)
+  ruc                    String                   @db.VarChar(20)
+  numero_telefono        String?                  @db.VarChar(20)
+  correo                 String?                  @db.VarChar(255)
+  direccion              String?                  @db.VarChar(255)
+  movimiento_entrada     movimiento_entrada[]
+  orden_reabastecimiento orden_reabastecimiento[]
+  producto               producto[]
+}
+
+model serie_comprobante {
+  tipo_comprobante   String  @id @db.VarChar(20)
+  serie              String? @db.VarChar(10)
+  ultimo_correlativo Int?
+}
+
+model usuarios {
+  id                     Int                      @id(map: "users_pkey") @default(autoincrement())
+  username               String                   @unique(map: "users_username_key")
+  password               String
+  email                  String?                  @unique(map: "users_email_key")
+  rol                    String
+  reset_token            String?
+  reset_token_expires    DateTime?                @db.Timestamp(6)
+  estado                 String                   @default("Activado") @db.VarChar(20)
+  nivel_acceso           String                   @default("basico") @db.VarChar(20)
+  auditoria_producto     auditoria_producto[]
+  movimiento             movimiento[]
+  orden_reabastecimiento orden_reabastecimiento[]
+}

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle de Orden #<%= orden.id_order %></title>
+  <link rel="stylesheet" href="/detalleOrden.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --primary-dark: #2980b9;
+      --accent-color: #2ecc71;
+      --accent-dark: #27ae60;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --gray-light: #f5f5f5;
+      --gray-medium: #e0e0e0;
+      --gray-dark: #718093;
+      --text-color: #2d3436;
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      --border-radius: 6px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background-color: #f9fafb;
+      color: var(--text-color);
+      padding: 20px 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 0 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding: 20px 0 10px;
+      border-bottom: 2px solid var(--gray-light);
+    }
+
+    .btns {
+      margin-bottom: 30px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      color: white;
+      border-radius: var(--border-radius);
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .btn-volver {
+      background-color: var(--gray-dark);
+    }
+
+    .btn-volver:hover {
+      background-color: #5a6574;
+    }
+
+    .btn-pdf {
+      background-color: var(--primary-color);
+    }
+
+    .btn-pdf:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .orden-info {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .orden-info p {
+      margin: 0;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .orden-info strong {
+      color: var(--gray-dark);
+      min-width: 80px;
+    }
+
+    .estado {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .estado.pendiente {
+      background-color: rgba(241, 196, 15, 0.1);
+      color: #f1c40f;
+      border: 1px solid rgba(241, 196, 15, 0.3);
+    }
+
+    .estado.en_proceso {
+      background-color: rgba(52, 152, 219, 0.1);
+      color: var(--primary-color);
+      border: 1px solid rgba(52, 152, 219, 0.3);
+    }
+
+    .estado.completada {
+      background-color: rgba(46, 204, 113, 0.1);
+      color: var(--accent-color);
+      border: 1px solid rgba(46, 204, 113, 0.3);
+    }
+
+    .estado.cancelada {
+      background-color: rgba(231, 76, 60, 0.1);
+      color: var(--danger-color);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+    }
+
+    .tabla-productos {
+      width: 100%;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border-collapse: collapse;
+    }
+
+    .tabla-productos thead {
+      background-color: #f8f9fa;
+    }
+
+    .tabla-productos th {
+      padding: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-dark);
+      border-bottom: 2px solid var(--gray-medium);
+      text-align: center;
+    }
+
+    .tabla-productos td {
+      padding: 12px;
+      font-size: 14px;
+      text-align: center;
+      border-bottom: 1px solid var(--gray-light);
+    }
+
+    .tabla-productos td:nth-child(3),
+    .tabla-productos td:nth-child(4) {
+      padding-right: 8px;
+      padding-left: 8px;
+    }
+
+    .tabla-productos tbody tr:hover {
+      background-color: rgba(52, 152, 219, 0.05);
+    }
+
+    .ingresado, .no-ingresado {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .ingresado {
+      background-color: rgba(46, 204, 113, 0.1);
+      color: var(--accent-color);
+      border: 1px solid rgba(46, 204, 113, 0.3);
+    }
+
+    .no-ingresado {
+      background-color: rgba(231, 76, 60, 0.1);
+      color: var(--danger-color);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .tabla-productos {
+        display: block;
+        overflow-x: auto;
+      }
+
+      .tabla-productos table {
+        min-width: 600px;
+      }
+
+      .btns {
+        flex-direction: column;
+      }
+    }
+    .card-incidencias {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-top: 30px;
+}
+
+.card-incidencias h2 {
+  font-size: 20px;
+  margin-bottom: 16px;
+  color: var(--text-color);
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Detalle de Orden #<%= orden.id_order %></h1>
+
+    <div class="btns">
+      <a href="/ordenes" class="btn btn-volver"><i class="fas fa-arrow-left"></i> Volver</a>
+      <a href="/ordenes/detalle/pdf/<%= orden.id_order %>" class="btn btn-pdf" target="_blank"><i class="fas fa-file-pdf"></i> Descargar PDF</a>
+    </div>
+
+    <div class="orden-info">
+  <p><strong>Proveedor:</strong> <%= orden.proveedor %></p>
+
+  <p><strong>Fecha:</strong>
+    <%= new Date(orden.fecha).toLocaleDateString("es-PE", {
+      timeZone: "America/Lima",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }) %>
+  </p>
+
+  <p><strong>Hora:</strong>
+    <%= new Date(orden.fecha).toLocaleTimeString("es-PE", {
+      timeZone: "America/Lima",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true
+    }) %>
+  </p>
+
+  <p><strong>Usuario:</strong> <%= orden.usuario %></p>
+
+  <p><strong>Estado:</strong> 
+    <span class="estado <%= orden.estado %>">
+      <%= orden.estado.replace('_', ' ').toUpperCase() %>
+    </span>
+  </p>
+</div>
+
+    <table class="tabla-productos">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Categoría</th>
+          <th>Cantidad</th>
+          <th>Ingresado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% orden.products.forEach(producto => { %>
+          <tr>
+            <td><%= producto.nombre %></td>
+            <td><%= producto.categoria %></td>
+            <td><%= producto.cantidad %></td>
+            <td><%= producto.ingresado %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+         <!-- Sección de Incidencias -->
+    <div class="card-incidencias">
+      <h2>Incidencias Asociadas</h2>
+      <% if (incidencias.length === 0) { %>
+        <p style="margin-top: 12px; color: var(--gray-dark);">No se han reportado incidencias para esta orden.</p>
+      <% } else { %>
+        <table class="tabla-productos">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Movimiento</th>
+              <th>Detalle</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% incidencias.forEach(inc => { %>
+              <tr>
+                <td><%= inc.id_incidencia %></td>
+              <td>
+                <%= new Date(inc.fecha).toLocaleString("es-PE", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                  timeZone: "America/Lima"
+                }) %>
+              </td>                <td><%= inc.id_movimiento %></td>
+                <td style="text-align: left;">
+                  <ul style="padding-left: 16px; margin: 0;">
+                    <% inc.detalle_productos.forEach(p => { %>
+                      <li>
+                        <strong><%= p.nombre %></strong> (x<%= p.cantidad %>)<br>
+                        <small style="color: var(--danger-color);">↪ <%= p.incidencia %></small>
+                      </li>
+                    <% }) %>
+                  </ul>
+                </td>
+                <td>
+                  <a href="/incidencias/<%= inc.id_incidencia %>" class="btn btn-pdf" style="padding: 6px 10px; font-size: 13px;">
+                    <i class="fas fa-eye"></i> Ver
+                  </a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+<% if (user.nivel_acceso === 'superadmin' && orden.estado !== 'finalizada' && orden.estado !== 'cancelada') { %>
+  <div style="display: flex; justify-content: center; margin-top: 2rem;">
+    <form action="/ordenes/<%= orden.id_order %>/cancelar" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta orden?');">
+      <button type="submit" class="btn btn-pdf" style="background-color: var(--danger-color);">
+        <i class="fas fa-times-circle"></i> Cancelar Orden
+      </button>
+    </form>
+  </div>
+<% } else { %>
+  <div style="display: flex; justify-content: center; margin-top: 2rem;">
+    <button class="btn btn-pdf" style="background-color: var(--danger-color); opacity: 0.5; pointer-events: none;"
+      title="<%= orden.estado === 'finalizada' || orden.estado === 'cancelada'
+                ? 'No se puede cancelar una orden finalizada o cancelada'
+                : 'Solo el superadmin puede cancelar órdenes' %>">
+      <i class="fas fa-times-circle"></i> Cancelar Orden
+    </button>
+  </div>
+<% } %>
+
+  </div>
+
+  <script src="https://kit.fontawesome.com/a2e0e6d67a.js" crossorigin="anonymous"></script>
+</body>
+</html>

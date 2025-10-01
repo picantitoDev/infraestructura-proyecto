@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicon/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <title>Comprobante de Pago</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .invoice-container {
+        max-width: 800px;
+        margin: auto;
+        border: 1px solid #ccc;
+        padding: 20px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        height: 8rem;
+      }
+
+      .logo img {
+        width: 90%;
+        margin-bottom: 5px;
+      }
+
+      .logo h2 {
+        margin: 0;
+        color: #1d2a84;
+      }
+
+      .ruc {
+        text-align: center;
+        border: 2px solid black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        width: 210px;
+        line-height: 0.3rem;
+      }
+
+      .organizacion {
+        text-align: center;
+        line-height: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .info {
+        margin-top: 20px;
+        line-height: 1.9;
+      }
+
+      .tabla {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      .tabla th,
+      .tabla td {
+        border: 1px solid #000;
+        padding: 6px;
+        text-align: center;
+      }
+
+      .total {
+        background-color: #fef0d3;
+        font-weight: bold;
+      }
+
+      .monto-letras {
+        margin-top: 20px;
+        font-weight: bold;
+      }
+
+      .resumen {
+        margin-top: 20px;
+        text-align: right;
+      }
+
+      .nombre-orga {
+        color: #283186;
+      }
+
+      .tabla-header {
+        background-color: #1d2a84;
+        color: white;
+      }
+
+      .info-row {
+        display: flex;
+        margin-bottom: 8px; /* Ajusta este valor para cambiar el espacio entre filas */
+        line-height: 1.6;
+      }
+
+      .info-label {
+        width: 150px; /* Ancho fijo para las etiquetas */
+        font-weight: bold;
+      }
+
+      .info-value {
+        flex: 1; /* Ocupa el resto del espacio disponible */
+      }
+
+      .tipo-comprobante {
+        line-height: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="invoice-container">
+      <div class="header">
+        <div class="logo">
+          <img src="<%= logo %>" alt="Stock Cloud Logo" />
+        </div>
+        <div class="organizacion">
+          <div>
+            <h2 class="nombre-orga">STOCK CLOUD</h2>
+            <p>Teléfono 976167251 Trujillo-Perú</p>
+            <p>Av. América Sur 1910, Trujillo 13006</p>
+          </div>
+        </div>
+        <div class="ruc">
+          <div>
+            <p>R.U.C. No. <strong>132345423345</strong></p>
+            <p class="tipo-comprobante">
+              <strong
+                ><%= tipoComprobante === 'boleta' ? 'BOLETA DE VENTA' :
+                'FACTURA' %></strong
+              >
+              <strong>ELECTRONICA</strong>
+            </p>
+            <p>
+              <strong>
+                <strong><%= tipoComprobante === 'boleta' ? 'B' : 'F' %></strong
+                >012-04883929</strong
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="info">
+        <div class="info-row">
+          <span class="info-label">
+            <strong
+              ><%= tipoComprobante === "factura" ? "RAZÓN SOCIAL:" :
+              "SEÑOR(ES):" %></strong
+            >
+          </span>
+          <span class="info-value"><%= cliente.identificacion %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">
+            <strong
+              ><%= tipoComprobante === "factura" ? "R.U.C.:" : "DNI:" %></strong
+            >
+          </span>
+          <span class="info-value"><%= cliente.documento_identidad %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label"><strong>FECHA EMISIÓN:</strong></span>
+          <span class="info-value"><%= fecha %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label"><strong>DIRECCIÓN:</strong></span>
+          <span class="info-value"><%= cliente.direccion %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label"><strong>TIPO MONEDA:</strong></span>
+          <span class="info-value">PEN</span>
+        </div>
+      </div>
+
+      <table class="tabla">
+        <thead>
+          <tr class="tabla-header">
+            <th>CODIGO</th>
+            <th>DESCRIPCION</th>
+            <th>CANTIDAD</th>
+            <th>PRECIO UNITARIO</th>
+            <th>PRECIO VENTA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% productos.forEach(p => { %>
+          <tr>
+            <td><%= p.codigo %></td>
+            <!-- sku renombrado como codigo -->
+            <td><%= p.descripcion %></td>
+            <!-- nombre como descripcion -->
+            <td><%= p.cantidad %></td>
+            <td>S/ <%= Number(p.precioUnitario).toFixed(2) %></td>
+            <td>S/ <%= parseFloat(p.subtotal) %></td>
+          </tr>
+          <% }) %>
+          <tr class="total">
+            <td colspan="4">TOTAL</td>
+            <td>S/ <%= total %></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="monto-letras">Son : <strong><%= montoLetras %></strong></div>
+
+      <div class="resumen">
+        <p>Total Valor de Venta - Operaciones Gravadas: S/ 0.00</p>
+        <p>Total Valor de Venta - Operaciones Inafecta: S/ <%= total %></p>
+        <p>IGV: S/ 0.00</p>
+        <p><strong>Importe Total:</strong> S/ <%= total %></p>
+      </div>
+    </div>
+  </body>
+</html>

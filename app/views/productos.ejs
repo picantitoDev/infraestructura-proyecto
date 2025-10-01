@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="shortcut icon" href="/favicon/favicon.ico">
+    <title>Productos</title>
+    <link rel="stylesheet" href="/listarProductos.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <header class="top-bar">
+        <div class="back-btn">
+                    Productos
+        </div>
+      </header>
+
+      <section class="filtering">
+        <div class="search">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            id="searchBar"
+            class="search-input"
+            placeholder="Buscar producto..."
+          />
+        </div>
+        <div class="filter">
+          <div class="status-toggle">
+            <label class="switch">
+              <input type="checkbox" id="statusToggle" checked />
+              <span class="slider"></span>
+            </label>
+            <span id="statusLabel">Activos</span>
+          </div>
+
+          <!-- Dynamic Category Filter -->
+          <select id="categoryFilter" class="category-select">
+            <option value="all">Todas</option>
+            <% categorias.forEach((cat) => { %>
+            <option value="<%= cat.nombre %>"><%= cat.nombre %></option>
+            <% }) %>
+          </select>
+
+          <form
+            action="/productos/crear-producto"
+            method="GET"
+            class="add-form"
+          >
+            <button type="submit" class="add-btn">+</button>
+          </form>
+        </div>
+      </section>
+      <div class="table-container">
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Stock</th>
+              <th>Precio Unitario</th>
+              <th>Categoría</th>
+              <th>Proveedor</th>
+              <th>Detalle</th>
+            </tr>
+          </thead>
+          <tbody id="productTableBody">
+            <% productos.forEach((producto) => { %>
+            <tr
+              class="product-row"
+              data-status="<%= producto.estado %>"
+              data-category="<%= producto.categoria %>"
+            >
+              <td class="product-name"><%= producto.nombre %></td>
+              <td
+              class="<%= producto.estado === "Activado" && producto.stock < producto.cantidad_minima ? 'low-stock' : '' %>"
+              >
+                <%= producto.stock %> <% if (producto.stock <
+                producto.cantidad_minima && producto.estado === "Activado") { %>
+                <i
+                  class="fa-solid fa-triangle-exclamation warning-icon"
+                  title="Stock bajo"
+                ></i>
+                <% } %>
+              </td>
+              <td>S/. <%= producto.precio_unitario %></td>
+              <td class="product-category"><%= producto.categoria.nombre %></td>
+              <td class="product-supplier"><%= producto.proveedor.razon_social %></td>
+              <td>
+                <a
+                  class="view-btn"
+                  href="/productos/detalle/<%= producto.id_producto %>"
+                  title="Ver Detalle"
+                >
+                  <i class="fa-solid fa-eye"></i>
+                </a>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const searchBar = document.getElementById("searchBar")
+        const categoryFilter = document.getElementById("categoryFilter")
+        const statusToggle = document.getElementById("statusToggle")
+        const statusLabel = document.getElementById("statusLabel")
+        const productRows = document.querySelectorAll(".product-row")
+
+        // Función para aplicar filtros
+        function applyFilters() {
+          const searchText = searchBar.value.toLowerCase().trim()
+          const selectedCategory = categoryFilter.value
+          const showActive = statusToggle.checked
+
+          let visibleCount = 0
+
+          productRows.forEach((row) => {
+            const name = row
+              .querySelector(".product-name")
+              .textContent.toLowerCase()
+            const category = row.querySelector(".product-category").textContent
+            const status = row.dataset.status
+
+            // Verificar coincidencias
+            const matchesSearch = name.includes(searchText)
+            const matchesCategory =
+              selectedCategory === "all" || category === selectedCategory
+            const matchesStatus = showActive
+              ? status === "Activado"
+              : status === "Desactivado"
+
+            if (matchesSearch && matchesCategory && matchesStatus) {
+              row.style.display = ""
+              visibleCount++
+            } else {
+              row.style.display = "none"
+            }
+          })
+
+          // Mostrar mensaje si no hay resultados
+          const noResultsRow = document.getElementById("noResultsRow")
+          if (visibleCount === 0) {
+            if (!noResultsRow) {
+              const tbody = document.getElementById("productTableBody")
+              const newRow = document.createElement("tr")
+              newRow.id = "noResultsRow"
+              newRow.innerHTML = `<td colspan="7" style="text-align: center;">No se encontraron productos</td>`
+              tbody.appendChild(newRow)
+            }
+          } else if (noResultsRow) {
+            noResultsRow.remove()
+          }
+
+          // Actualizar etiqueta de estado
+          statusLabel.textContent = showActive ? "Activos" : "Inactivos"
+        }
+
+        // Event listeners
+        searchBar.addEventListener("input", applyFilters)
+        categoryFilter.addEventListener("change", applyFilters)
+        statusToggle.addEventListener("change", applyFilters)
+
+        // Filtro inicial
+        applyFilters()
+      })
+    </script>
+  </body>
+</html>
