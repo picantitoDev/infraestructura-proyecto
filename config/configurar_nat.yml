@@ -1,0 +1,40 @@
+---
+- name: Configurar NAT y forwarding con nftables en Devuan
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Habilitar IP forwarding inmediatamente
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        state: present
+
+    - name: Asegurar que IP forwarding sea persistente en sysctl.conf
+      lineinfile:
+        path: /etc/sysctl.conf
+        regexp: '^net.ipv4.ip_forward'
+        line: 'net.ipv4.ip_forward=1'
+
+    - name: Limpiar reglas existentes de nftables
+      command: nft flush ruleset
+
+    - name: Crear reglas nftables con NAT
+      copy:
+        dest: /etc/nftables.conf
+        content: |
+          table inet filter {
+              chain input   { type filter hook input priority 0; policy accept; }
+              chain forward { type filter hook forward priority 0; policy accept; }
+              chain output  { type filter hook output priority 0; policy accept; }
+          }
+
+          table ip nat {
+              chain postrouting {
+                  type nat hook postrouting priority srcnat; policy accept;
+                  ip saddr 10.10.0.0/24 oifname "eth0" masquerade
+              }
+          }
+
+    - name: Aplicar reglas nftables desde el archivo
+      command: nft -f /etc/nftables.conf
