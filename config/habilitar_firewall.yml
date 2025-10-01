@@ -18,8 +18,5 @@
               }
           }
 
-    - name: Habilitar y aplicar nftables
-      ansible.builtin.systemd:
-        name: nftables
-        state: restarted
-        enabled: yes
+    - name: Aplicar reglas nftables inmediatamente
+      command: nft -f /etc/nftables.conf
