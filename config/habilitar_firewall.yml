@@ -1,0 +1,22 @@
+---
+- name: Configurar nftables para solo permitir SSH y HTTPS desde 192.168.0.150
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Crear reglas nftables
+      copy:
+        dest: /etc/nftables.conf
+        content: |
+          table inet filter {
+              chain input {
+                  type filter hook input priority 0; policy drop;
+                  iif "lo" accept
+                  ct state established,related accept
+                  ip saddr 192.168.0.150 tcp dport 22 accept
+                  ip saddr 192.168.0.150 tcp dport 443 accept
+              }
+          }
+
+    - name: Aplicar reglas nftables inmediatamente
+      command: nft -f /etc/nftables.conf
