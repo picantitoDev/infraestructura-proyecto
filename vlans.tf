@@ -21,3 +21,11 @@ resource "proxmox_virtual_environment_network_linux_vlan" "vlan30" {
   comment   = "VLAN 30 - Capa de Persistencia"
   autostart = true
 }
+
+# VLAN 40 - Aislamiento de la instancia NAT
+resource "proxmox_virtual_environment_network_linux_vlan" "vlan40" {
+  node_name = "proxmox"
+  name      = "vmbr0.40"
+  comment   = "VLAN 40 - Para aislar la instancia NAT"
+  autostart = true
+}
