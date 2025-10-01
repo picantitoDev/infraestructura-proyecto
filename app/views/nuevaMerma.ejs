@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicon/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <title>Registrar Merma</title>
+    <link rel="stylesheet" href="/registrarMerma.css" />
+    <style>
+      /* Estilo básico */
+      #autocomplete-results {
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        width: 550px;
+        background-color: white;
+        border: none; /* No borde al inicio */
+        z-index: 1000;
+      }
+      .autocomplete-item {
+        padding: 10px;
+        cursor: pointer;
+      }
+      .autocomplete-item:hover {
+        background-color: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a href="/movimientos">← Atrás</a>
+      <h1 class="title">Registrar Merma</h1>
+
+      <form
+        id="adjustmentForm"
+        action="/movimientos/registrar-merma"
+        method="POST"
+      >
+        <div class="form-group" style="position: relative">
+          <label for="producto">Producto</label>
+          <input
+            type="text"
+            id="producto"
+            name="producto"
+            placeholder="Buscar producto..."
+            autocomplete="off"
+            required
+          />
+          <div id="autocomplete-results"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="cantidad">Cantidad</label>
+          <input
+            type="number"
+            id="cantidad"
+            name="cantidad"
+            placeholder="Cantidad"
+            required
+            min="1"
+          />
+        </div>
+
+<div class="form-group">
+  <label for="motivo">Motivo</label>
+  <select id="motivo" name="motivo" required>
+    <option value="productos_vencidos">Productos vencidos</option>
+    <option value="dano_en_almacen">Daño en almacén</option>
+    <option value="robo">Robo del producto</option>
+    <option value="otros">Otros (especificar)</option>
+  </select>
+</div>
+        <div class="form-group">
+          <label for="descripcion">Descripción</label>
+          <textarea
+            id="descripcion"
+            name="descripcion"
+            placeholder="Detalles adicionales..."
+            required
+          ></textarea>
+        </div>
+
+        <div class="button-group">
+          <button id="submitBtn" type="submit" class="btn btn-primary">
+            Registrar Ajuste
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="window.location.href='/movimientos'"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Productos disponibles en JSON -->
+    <script id="productos-data" type="application/json">
+      <%- JSON.stringify(productos) %>
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const productos = JSON.parse(
+          document.getElementById("productos-data").textContent
+        )
+        const productoInput = document.getElementById("producto")
+        const cantidadInput = document.getElementById("cantidad")
+        const resultsContainer = document.getElementById("autocomplete-results")
+        const form = document.getElementById("adjustmentForm")
+        const submitBtn = document.getElementById("submitBtn")
+
+        let selectedProducto = null
+
+        productoInput.addEventListener("input", function () {
+          const query = productoInput.value.trim().toLowerCase()
+
+          // Limpiar resultados
+          resultsContainer.innerHTML = ""
+          resultsContainer.style.border = "none"
+
+          if (query.length < 2) {
+            return
+          }
+
+          // Filtrar productos
+          const productosFiltrados = productos.filter((producto) =>
+            producto.nombre.toLowerCase().includes(query)
+          )
+
+          if (productosFiltrados.length > 0) {
+            productosFiltrados.forEach((producto) => {
+              const resultItem = document.createElement("div")
+              resultItem.classList.add("autocomplete-item")
+              resultItem.textContent = `${producto.nombre} - Stock: ${producto.stock} - $${producto.precio_unitario}`
+
+              resultItem.addEventListener("click", function () {
+                productoInput.value = producto.nombre
+                selectedProducto = producto
+                resultsContainer.innerHTML = ""
+                resultsContainer.style.border = "none"
+                cantidadInput.max = producto.stock
+                cantidadInput.value = ""
+              })
+
+              resultsContainer.appendChild(resultItem)
+            })
+
+            resultsContainer.style.border = "1px solid gray" // Mostrar borde
+          } else {
+            const noResult = document.createElement("div")
+            noResult.textContent = "No se encontraron productos"
+            noResult.classList.add("autocomplete-item")
+            resultsContainer.appendChild(noResult)
+            resultsContainer.style.border = "1px solid gray" // Mostrar borde
+          }
+        })
+
+        cantidadInput.addEventListener("input", function () {
+          if (selectedProducto) {
+            const cantidad = parseInt(cantidadInput.value) || 0
+            const stock = selectedProducto.stock
+
+            // Custom validation
+            if (cantidad > stock) {
+              cantidadInput.setCustomValidity(
+                `No hay suficiente stock. Stock disponible: ${stock}`
+              )
+            } else if (cantidad < 1) {
+              cantidadInput.setCustomValidity(
+                "La cantidad mínima permitida es 1"
+              )
+            } else {
+              cantidadInput.setCustomValidity("") // Reset custom validity
+            }
+
+            // Manually trigger validation to show custom message
+            cantidadInput.reportValidity()
+          }
+        })
+
+        form.addEventListener("submit", function (e) {
+          // Validar que se seleccionó un producto
+          if (!selectedProducto) {
+            e.preventDefault()
+            alert("Debe seleccionar un producto de la lista")
+            productoInput.focus()
+            return
+          }
+
+          // Validar cantidad
+          if (!cantidadInput.checkValidity()) {
+            e.preventDefault()
+            cantidadInput.reportValidity()
+            return
+          }
+
+          // Deshabilitar botón y mostrar spinner
+          submitBtn.disabled = true
+          submitBtn.innerHTML =
+            '<i class="fa fa-spinner fa-spin"></i> Procesando...'
+        })
+      })
+    </script>
+  </body>
+</html>

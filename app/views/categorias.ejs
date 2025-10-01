@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <link
+  rel="apple-touch-icon"
+  sizes="180x180"
+  href="/favicon/apple-touch-icon.png"
+/>
+<link
+  rel="icon"
+  type="image/png"
+  sizes="32x32"
+  href="/favicon/favicon-32x32.png"
+/>
+<link
+  rel="icon"
+  type="image/png"
+  sizes="16x16"
+  href="/favicon/favicon-16x16.png"
+/>
+<link rel="manifest" href="/favicon/site.webmanifest" />
+<link rel="shortcut icon" href="/favicon/favicon.ico" />
+
+    <title><%- title %></title>
+    <link rel="stylesheet" href="/listarCategorias.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .error-message {
+        color: red;
+        font-size: 12px;
+        padding: 0;
+        margin: 0 auto;
+      }
+
+      .input-error {
+        border: 2px solid red;
+      }
+
+      .input-container {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        gap: 1.5rem;
+        justify-content: space-around;
+      }
+
+      .categoria-table {
+        margin-top: 0;
+        padding-top: 0;
+      }
+
+      td button {
+      margin: 0 3px;
+      cursor: pointer;
+    }
+
+    td button:hover i {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Listado de Categorías</h1>
+
+      <!-- Formulario para crear nueva categoría -->
+      <form action="/categorias" method="POST" class="categoria-form">
+        <div class="input-container">
+          <label for="nombre">Nueva Categoría:</label>
+          <input type="text" id="nombre" name="nombre" required />
+          <button type="submit" class="btn-agregar">Agregar</button>
+        </div>
+        <div id="error-message" class="error-message"></div>
+        <!-- Error message container -->
+      </form>
+
+      <!-- Tabla de categorías existentes -->
+      <div class="categoria-table-container">
+        <table class="categoria-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+                <tbody>
+  <!-- Categorías activas primero -->
+  <% categorias.filter(cat => cat.estado === 'activa').forEach((cat) => { %>
+    <tr data-id="<%= cat.id_categoria %>" class="">
+      <td><%= cat.id_categoria %></td>
+      <td>
+        <span class="nombre-texto"><%= cat.nombre %></span>
+        <input class="nombre-input" type="text" value="<%= cat.nombre %>" style="display: none;" />
+      </td>
+      <td>
+        <button class="btn-editar" title="Editar" style="background: none; border: none; cursor: pointer;">
+          <i class="fas fa-pen-to-square" style="color: #007bff; font-size: 18px;"></i>
+        </button>
+        <button class="btn-guardar" title="Guardar" style="display: none; background: none; border: none; cursor: pointer;">
+          <i class="fas fa-check" style="color: #28a745; font-size: 18px;"></i>
+        </button>
+        <button class="btn-cancelar" title="Cancelar" style="display: none; background: none; border: none; cursor: pointer;">
+          <i class="fas fa-xmark" style="color: #dc3545; font-size: 18px;"></i>
+        </button>
+        <button class="btn-desactivar" title="Desactivar" style="background: none; border: none; cursor: pointer;">
+          <i class="fas fa-ban" style="color: #dc3545; font-size: 18px;"></i>
+        </button>
+        <button class="btn-activar" title="Activar" style="display: none; background: none; border: none; cursor: pointer;">
+          <i class="fas fa-circle-check" style="color: #17a2b8; font-size: 18px;"></i>
+        </button>
+      </td>
+    </tr>
+  <% }) %>
+
+  <!-- Categorías inactivas después -->
+  <% categorias.filter(cat => cat.estado === 'inactiva').forEach((cat) => { %>
+    <tr data-id="<%= cat.id_categoria %>" class="inactiva" style="opacity: 0.5;">
+      <td><%= cat.id_categoria %></td>
+      <td>
+        <span class="nombre-texto"><%= cat.nombre %></span>
+        <input class="nombre-input" type="text" value="<%= cat.nombre %>" style="display: none;" />
+      </td>
+      <td>  
+        <button class="btn-editar" title="Editar" style="background: none; border: none; cursor: pointer;">
+          <i class="fas fa-pen-to-square" style="color: #007bff; font-size: 18px;"></i>
+        </button>
+        <button class="btn-guardar" title="Guardar" style="display: none; background: none; border: none; cursor: pointer;">
+          <i class="fas fa-check" style="color: #28a745; font-size: 18px;"></i>
+        </button>
+        <button class="btn-cancelar" title="Cancelar" style="display: none; background: none; border: none; cursor: pointer;">
+          <i class="fas fa-xmark" style="color: #dc3545; font-size: 18px;"></i>
+        </button>
+        <button class="btn-desactivar" title="Desactivar" style="display: none; background: none; border: none; cursor: pointer;">
+          <i class="fas fa-ban" style="color: #dc3545; font-size: 18px;"></i>
+        </button>
+        <button class="btn-activar" title="Activar" style="background: none; border: none; cursor: pointer;">
+          <i class="fas fa-circle-check" style="color: #17a2b8; font-size: 18px;"></i>
+        </button>
+      </td>
+    </tr>
+  <% }) %>
+</tbody>
+        </table>
+      </div>
+    </div>
+    </div>
+
+<div id="modalConfirmacion" style="display: none; position: fixed; z-index: 999; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6);">
+  <div style="background: white; padding: 30px; border-radius: 12px; width: 500px; max-width: 90%; margin: 12% auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-family: 'Segoe UI', sans-serif;">
+    <p id="modalMensaje" style="font-size: 18px; margin-bottom: 30px;">¿Estás seguro de que deseas desactivar esta categoría?</p>
+    <div id="modalBotonesConfirmacion" style="display: flex; justify-content: center; gap: 15px;">
+      <button id="confirmarDesactivacion" style="padding: 10px 20px; border: none; border-radius: 8px; background-color: #dc3545; color: white; font-size: 16px; cursor: pointer;">Sí, desactivar</button>
+      <button id="cancelarDesactivacion" style="padding: 10px 20px; border: none; border-radius: 8px; background-color: #6c757d; color: white; font-size: 16px; cursor: pointer;">Cancelar</button>
+    </div>
+    <div id="modalBotonesError" style="display: none; justify-content: center; gap: 15px;">
+      <button id="volverModal" style="padding: 10px 20px; border: none; border-radius: 8px; background-color: #007bff; color: white; font-size: 16px; cursor: pointer;">Volver</button>
+    </div>
+  </div>
+</div>
+
+
+  <script id="categorias-data" type="application/json">
+      <%- JSON.stringify(categorias.map(cat => cat.nombre.toLowerCase().trim())) %>
+    </script>
+
+    <script>
+      const existingCategories = JSON.parse(
+        document.getElementById("categorias-data").textContent
+      )
+
+      const input = document.getElementById("nombre")
+      const button = document.querySelector(".btn-agregar")
+      const errorMessage = document.getElementById("error-message")
+      const regexNombreValido = /^[\p{L}, ]+$/u;
+
+      input.addEventListener("input", () => {
+        const value = input.value.toLowerCase().trim()
+
+          if (value === "") {
+          input.setCustomValidity("");
+          input.classList.remove("input-error");
+          errorMessage.textContent = "";
+          button.disabled = true; // puedes deshabilitar mientras está vacío
+          return;
+        }
+
+          if (!regexNombreValido.test(value)) {
+          input.setCustomValidity("Solo se permiten letras y espacios.");
+          input.classList.add("input-error");
+          errorMessage.textContent = "Solo se permiten letras y espacios.";
+          button.disabled = true;
+        } else if (existingCategories.includes(value)) {
+          input.setCustomValidity("La categoría ya existe.");
+          input.classList.add("input-error");
+          errorMessage.textContent = "La categoría ya existe.";
+          button.disabled = true;
+        } else {
+          input.setCustomValidity("");
+          input.classList.remove("input-error");
+          errorMessage.textContent = "";
+          button.disabled = false;
+        }
+      })
+
+      // Also handle form submission to prevent default behavior
+      document
+        .querySelector(".categoria-form")
+        .addEventListener("submit", (e) => {
+          const value = input.value.toLowerCase().trim()
+
+              if (value === "") {
+                e.preventDefault();
+                input.setCustomValidity("El campo no puede estar vacío.");
+                input.classList.add("input-error");
+                errorMessage.textContent = "El campo no puede estar vacío.";
+                button.disabled = true;
+            }
+
+            if (!regexNombreValido.test(value)) {
+              e.preventDefault();
+              input.setCustomValidity("Solo se permiten letras y espacios.");
+              input.classList.add("input-error");
+              errorMessage.textContent = "Solo se permiten letras y espacios.";
+              button.disabled = true;
+            } else if (existingCategories.includes(value)) {
+              e.preventDefault();
+              input.setCustomValidity("La categoría ya existe.");
+              input.classList.add("input-error");
+              errorMessage.textContent = "La categoría ya existe.";
+              button.disabled = true;
+            }
+        })
+
+
+
+        // AYUDAME DIOSITO
+
+  let categoriaIdSeleccionada = null;
+  let trSeleccionada = null;
+
+  document.querySelectorAll('.btn-editar').forEach((btn) => {
+    btn.addEventListener('click', function () {
+      const tr = btn.closest('tr')
+      const span = tr.querySelector('.nombre-texto')
+      const input = tr.querySelector('.nombre-input')
+      const btnGuardar = tr.querySelector('.btn-guardar')
+      const btnCancelar = tr.querySelector('.btn-cancelar');
+
+      span.style.display = 'none'
+      input.style.display = 'inline-block'
+      btn.style.display = 'none'
+      btnGuardar.style.display = 'inline-block'
+      btnCancelar.style.display = 'inline-block';
+    })
+  })
+
+  document.querySelectorAll('.btn-guardar').forEach((btn) => {
+  btn.addEventListener('click', async function () {
+    const tr = btn.closest('tr');
+    const input = tr.querySelector('.nombre-input');
+    const span = tr.querySelector('.nombre-texto');
+    const id = tr.getAttribute('data-id');
+    const nuevoNombre = input.value.trim();
+    const nombreOriginal = span.textContent.trim();
+    const regexNombreValido = /^[\p{L}, ]+$/u;
+
+    const nuevoNombreNormalizado = nuevoNombre.toLowerCase();
+    const nombreOriginalNormalizado = nombreOriginal.toLowerCase();
+
+    if (!regexNombreValido.test(nuevoNombre)) {
+      input.classList.add("input-error");
+      alert("Solo se permiten letras y espacios.");
+      return;
+    }
+
+    if (nuevoNombre === "") {
+      input.classList.add("input-error");
+      alert("El nombre no puede estar vacío.");
+      return;
+    }
+
+    const nombresNormalizados = existingCategories.map(n => n.toLowerCase().trim());
+
+    if (nuevoNombreNormalizado !== nombreOriginalNormalizado && nombresNormalizados.includes(nuevoNombreNormalizado)) {
+      input.classList.add("input-error");
+      alert("Ya existe una categoría con ese nombre.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/categorias/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: nuevoNombre })
+      });
+
+      if (!res.ok) throw new Error("Error al actualizar");
+
+      // Actualizar texto en la tabla
+      span.textContent = nuevoNombre;
+      span.style.display = 'inline-block';
+      input.style.display = 'none';
+      btn.style.display = 'none';
+      tr.querySelector('.btn-editar').style.display = 'inline-block';
+      tr.querySelector('.btn-cancelar').style.display = 'none';
+      input.classList.remove("input-error");
+
+      // Actualizar array local existingCategories correctamente
+      const index = existingCategories.findIndex(nombre => nombre.toLowerCase().trim() === nombreOriginalNormalizado);
+      if (index !== -1) {
+        existingCategories[index] = nuevoNombre;
+      }
+
+      console.log(`✅ Guardado: categoría ID ${id} con nuevo nombre: ${nuevoNombre}`);
+    } catch (err) {
+      console.error(err);
+      alert("Ocurrió un error al guardar los cambios.");
+    }
+  });
+});
+
+  // Botón desactivar con modal
+  document.querySelectorAll('.btn-desactivar').forEach((btn) => {
+    btn.addEventListener('click', function () {
+      const tr = btn.closest('tr')
+      const id = tr.getAttribute('data-id')
+      const nombre = tr.querySelector('.nombre-texto').textContent
+
+      categoriaIdSeleccionada = id
+      trSeleccionada = tr
+
+      document.getElementById('modalMensaje').textContent = `¿Estás seguro de que quieres desactivar la categoría "${nombre}"?`
+      document.getElementById('modalConfirmacion').style.display = 'block'
+    })
+  })
+
+  document.getElementById('cancelarDesactivacion').addEventListener('click', function () {
+    document.getElementById('modalConfirmacion').style.display = 'none'
+    categoriaIdSeleccionada = null
+    trSeleccionada = null
+  })
+
+document.getElementById('confirmarDesactivacion').addEventListener('click', async function () {
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = "Procesando...";
+  btn.style.opacity = "0.6";
+  btn.style.cursor = "not-allowed";
+
+  if (!categoriaIdSeleccionada || !trSeleccionada) return;
+
+  try {
+    const res = await fetch(`/categorias/${categoriaIdSeleccionada}/estado`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estado: "inactiva" })
+    });
+
+    if (res.status === 400) {
+      const data = await res.json();
+      mostrarErrorEnModal(data.message || "No se pudo desactivar la categoría.");
+      return;
+    }
+
+    if (!res.ok) throw new Error("Error al desactivar");
+
+    trSeleccionada.classList.add('inactiva');
+    trSeleccionada.style.opacity = '0.5';
+    trSeleccionada.querySelector('.btn-desactivar').style.display = 'none';
+    trSeleccionada.querySelector('.btn-activar').style.display = 'inline-block';
+    reordenarFilasPorEstadoYId();
+
+      document.getElementById('modalConfirmacion').style.display = 'none';
+  categoriaIdSeleccionada = null;
+  trSeleccionada = null;
+  } catch (err) {
+    mostrarErrorEnModal("No se pudo desactivar la categoría.");
+    console.error(err);
+  } finally {
+    // Restaurar botón
+    btn.disabled = false;
+    btn.textContent = "Sí, desactivar";
+    btn.style.opacity = "1";
+    btn.style.cursor = "pointer";
+  }
+});
+
+function mostrarErrorEnModal(mensaje) {
+  document.getElementById("modalMensaje").textContent = mensaje;
+  document.getElementById("modalBotonesConfirmacion").style.display = "none";
+  document.getElementById("modalBotonesError").style.display = "flex";
+}
+
+document.getElementById('volverModal').addEventListener('click', function () {
+  document.getElementById('modalConfirmacion').style.display = 'none';
+  document.getElementById("modalBotonesError").style.display = "none";
+  document.getElementById("modalBotonesConfirmacion").style.display = "flex";
+  document.getElementById("modalMensaje").textContent = "";
+  categoriaIdSeleccionada = null;
+  trSeleccionada = null;
+});
+
+  // Activar categoría
+  document.querySelectorAll('.btn-activar').forEach((btn) => {
+    btn.addEventListener('click', async function () {
+      const tr = btn.closest('tr')
+      const id = tr.getAttribute('data-id')
+      const btnDesactivar = tr.querySelector('.btn-desactivar')
+
+      try {
+        const res = await fetch(`/categorias/${id}/estado`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ estado: "activa" })
+        })
+
+        if (!res.ok) throw new Error("Error al activar")
+
+        tr.classList.remove('inactiva')
+        tr.style.opacity = '1'
+        btn.style.display = 'none'
+        btnDesactivar.style.display = 'inline-block'
+        console.log(`✅ Activada categoría ID ${id}`)
+        reordenarFilasPorEstadoYId()
+      } catch (err) {
+        console.error(err)
+        alert("No se pudo activar la categoría.")
+      }
+    })
+  })
+
+  function reordenarFilasPorEstadoYId() {
+    const tbody = document.querySelector('tbody')
+    const filas = Array.from(tbody.querySelectorAll('tr'))
+
+    const filasOrdenadas = filas.sort((a, b) => {
+      const aInactiva = a.classList.contains('inactiva')
+      const bInactiva = b.classList.contains('inactiva')
+      const idA = parseInt(a.getAttribute('data-id'), 10)
+      const idB = parseInt(b.getAttribute('data-id'), 10)
+
+      if (aInactiva !== bInactiva) {
+        return aInactiva ? 1 : -1
+      }
+
+      return idA - idB
+    })
+
+    filasOrdenadas.forEach(fila => tbody.appendChild(fila))
+  }
+
+  document.querySelectorAll('.btn-cancelar').forEach((btn) => {
+  btn.addEventListener('click', function () {
+    const tr = btn.closest('tr');
+    const input = tr.querySelector('.nombre-input');
+    const span = tr.querySelector('.nombre-texto');
+    const btnEditar = tr.querySelector('.btn-editar');
+    const btnGuardar = tr.querySelector('.btn-guardar');
+
+    // Restaurar valor original
+    input.value = span.textContent.trim();
+
+    // Restaurar visibilidad
+    input.style.display = 'none';
+    span.style.display = 'inline-block';
+    btn.style.display = 'none';
+    btnGuardar.style.display = 'none';
+    btnEditar.style.display = 'inline-block';
+
+    // Limpiar estilos de error si los hubiera
+    input.classList.remove("input-error");
+  });
+});
+    </script>
+  </body>
+</html>

@@ -1,0 +1,497 @@
+<head>
+        <link rel="stylesheet" href="/registrarEntrada.css" />
+<title>Crear Orden</title>
+<style>
+  .stock-bajo {
+  color: red;
+}
+
+.modal-orden {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  position: relative;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+</style>
+</head>
+
+  <body>
+    <div class="venta-container">
+      <a href="/ordenes">← Atrás</a>
+      <h1 class="title">Registrar Orden</h1>
+
+      <form
+        action="/ordenes/nueva"
+        method="POST"
+        class="orden-form"
+      >
+        <!-- Selección de Proveedor -->
+        <div class="seccion proveedor">
+          <h3>
+            Proveedor
+          </h3>
+        <select id="proveedor" name="proveedor">
+          <option value="">Seleccione un proveedor</option>
+            <% proveedores.forEach(proveedor => { %>
+              <option value="<%= proveedor.id_proveedor %>" class="<%= proveedor.tieneStockBajo ? 'stock-bajo' : '' %>">                
+                <%= proveedor.razon_social %>
+                <% if (proveedor.tieneStockBajo) { %> - (Productos con bajo stock)<% } %>
+              </option>
+            <% }); %>
+        </select>
+          <!-- Mostrar información del proveedor seleccionado -->
+          <div id="proveedor-info">
+            <p>
+              <strong>Razón Social:</strong>
+              <span id="proveedor-razon-social"></span>
+            </p>
+            <p><strong>RUC:</strong> <span id="proveedor-ruc"></span></p>
+            <p>
+              <strong>Teléfono:</strong> <span id="proveedor-telefono"></span>
+            </p>
+            <p><strong>Correo:</strong> <span id="proveedor-correo"></span></p>
+            <p>
+              <strong>Dirección:</strong> <span id="proveedor-direccion"></span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Buscar y Agregar Productos -->
+        <div class="seccion productos">
+          <h3>
+            Productos
+          </h3>
+          <div class="search">
+            <input
+              type="text"
+              id="buscarProducto"
+              class="search-input"
+              placeholder="Buscar producto..."
+              disabled
+            />
+          </div>
+          <table class="productos-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Stock</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tablaProductos">
+              <!-- Productos se cargarán dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Resumen de Entrada -->
+        <div class="seccion resumen-entrada">
+          <h3>
+            Resumen de Entrada
+          </h3>
+          <table class="resumen-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Quitar</th>
+              </tr>
+            </thead>
+            <tbody id="resumenEntrada">
+              <!-- Productos agregados se mostrarán aquí -->
+                 <tr id="mensajeResumenVacio">
+                  <td colspan="3" style="text-align:center; font-style: italic; color: gray;">No se han agregado productos al resumen.</td>
+                </tr>
+            </tbody>
+          </table>
+          <div class="total-container" style="display: none;">
+            <p class="total-text">
+              Total: S/. <span id="totalVenta">0.00</span>
+            </p>
+          </div>
+          <input
+            type="hidden"
+            name="productos"
+            id="productos-seleccionados"
+            class="productos-seleccionados"
+          />
+          <input
+            type="hidden"
+            name="total"
+            id="input-total"
+            class="input-total"
+          />
+        </div>
+        <!-- Botón de Enviar -->
+        <div class="seccion submit-btn">
+          <button type="submit" class="submit-button btn-primary">
+            Crear Orden
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Modal de Detalle de Orden -->
+<div id="modalOrden" class="modal-orden hidden">
+  <div class="modal-content">
+    <span class="close-button" onclick="cerrarModalOrden()">&times;</span>
+    <h2></h2>
+    <p class="proveedor"></p>
+    <p class="fecha"></p>
+    <p><strong>Productos:</strong></p>
+    <ul class="lista-productos"></ul>
+  </div>
+</div>
+
+
+    <!-- Productos disponibles en JSON -->
+    <script id="productos-data" type="application/json">
+      <%- JSON.stringify(productos) %>
+    </script>
+
+    <script id="proveedores-data" type="application/json">
+      <%- JSON.stringify(proveedores) %>
+    </script>
+
+    <script id="productos-curso" type="application/json">
+      <%- JSON.stringify(productosEnCurso) %>
+    </script>
+
+
+    <script>
+      const productos = JSON.parse(
+        document.getElementById("productos-data").textContent
+      )
+      const proveedores = JSON.parse(
+        document.getElementById("proveedores-data").textContent
+      )
+
+      const productosEnCurso = JSON.parse(
+        document.getElementById("productos-curso").textContent
+      )
+
+    console.log("Productos:", productos)
+    console.log("Proveedores:", proveedores)
+    console.log("Productos en Curso:", productosEnCurso)
+
+      const proveedorSelect = document.getElementById("proveedor")
+      const proveedorInfo = document.getElementById("proveedor-info")
+      const tablaProductos = document.getElementById("tablaProductos")
+      const buscarInput = document.getElementById("buscarProducto")
+      const resumenEntrada = document.getElementById("resumenEntrada")
+      const totalVenta = document.getElementById("totalVenta")
+      const productosInput = document.querySelector(".productos-seleccionados")
+      const hiddenTotal = document.querySelector(".input-total")
+      const carrito = []
+
+      // Evento para cuando se selecciona un proveedor
+      proveedorSelect.addEventListener("change", (e) => {
+        const idProveedor = parseInt(e.target.value)
+
+        // Clear the shopping cart when changing suppliers
+        carrito.length = 0
+        renderResumenEntrada()
+
+        if (idProveedor) {
+          // Mostrar los datos del proveedor seleccionado
+          const proveedor = proveedores.find(
+            (p) => p.id_proveedor === idProveedor
+          )
+          if (proveedor) {
+            document.getElementById("proveedor-razon-social").textContent =
+              proveedor.razon_social
+            document.getElementById("proveedor-ruc").textContent = proveedor.ruc
+            document.getElementById("proveedor-telefono").textContent =
+              proveedor.numero_telefono
+            document.getElementById("proveedor-correo").textContent =
+              proveedor.correo
+            document.getElementById("proveedor-direccion").textContent =
+              proveedor.direccion
+
+            // Habilitar la búsqueda de productos y filtrar por proveedor
+            buscarInput.disabled = false
+            buscarInput.value = "" // Limpiar búsqueda
+
+            // Filtrar productos por nombre del proveedor (razón social)
+            const productosFiltrados = productos.filter((p) => {
+              return p.id_proveedor === proveedor.id_proveedor
+            })
+
+            renderTablaBusqueda(productosFiltrados, productosEnCurso)
+          } else {
+            console.log("Proveedor no encontrado")
+          }
+        } else {
+          // Limpiar la información del proveedor y deshabilitar la búsqueda
+          document.getElementById("proveedor-razon-social").textContent = ""
+          document.getElementById("proveedor-ruc").textContent = ""
+          document.getElementById("proveedor-telefono").textContent = ""
+          document.getElementById("proveedor-correo").textContent = ""
+          document.getElementById("proveedor-direccion").textContent = ""
+          buscarInput.disabled = true
+          buscarInput.value = ""
+
+          // Limpiar la tabla de productos
+          tablaProductos.innerHTML = `<tr><td colspan="3">Seleccione un proveedor para ver los productos</td></tr>`
+        }
+      })
+
+      // Función para renderizar la tabla de productos filtrados
+    function renderTablaBusqueda(filtrados, productosEnCurso = []) {
+      tablaProductos.innerHTML = ""; // Limpiar la tabla antes de agregar nuevas filas
+
+      if (filtrados.length === 0) {
+        tablaProductos.innerHTML = `<tr><td colspan="3">No se encontraron productos</td></tr>`;
+        return;
+      }
+
+      // Ordenar: productos con stock bajo primero
+      filtrados.sort((a, b) => {
+        const aEsBajo = a.stock < a.cantidad_minima;
+        const bEsBajo = b.stock < b.cantidad_minima;
+        return aEsBajo === bEsBajo ? 0 : aEsBajo ? -1 : 1;
+      });
+
+      filtrados.forEach((prod) => {
+        const row = document.createElement("tr");
+
+        const stockEsBajo = prod.stock < prod.cantidad_minima;
+        const enOrden = productosEnCurso.includes(prod.id_producto);
+
+        const stockTexto = stockEsBajo
+          ? `<span style="color: red; font-weight: bold;">${prod.stock} ⚠️ (bajo)</span>`
+          : prod.stock;
+
+        const boton = enOrden
+        ? `<span style="color: gray; font-style: italic;">Orden en curso 
+            <button type="button" onclick="mostrarModalOrden(${prod.id_producto})" style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">
+              Ver
+            </button> 
+          </span>`
+        : `<button type="button" onclick="agregarProducto(${prod.id_producto})">Agregar</button>`;
+
+
+        row.innerHTML = `
+          <td>${prod.nombre}</td>
+          <td>${stockTexto}</td>
+          <td>${boton}</td>
+        `;
+
+        tablaProductos.appendChild(row);
+      });
+    }
+
+      // Función para agregar un producto al carrito
+      function agregarProducto(idProducto) {
+        const producto = productos.find((p) => p.id_producto === idProducto)
+        if (!producto) return
+
+        // Verificar si el producto ya está en el carrito
+        const existente = carrito.find(
+          (item) => item.producto.id_producto === idProducto
+        )
+
+        if (existente) {
+          // Si ya existe, incrementar la cantidad
+          existente.cantidad++
+        } else {
+          // Si no existe, agregarlo con cantidad 1
+          carrito.push({
+            producto: producto,
+            cantidad: 1,
+          })
+        }
+
+        renderResumenEntrada()
+      }
+
+      // Función para renderizar los productos en el resumen
+function renderResumenEntrada() {
+  resumenEntrada.innerHTML = "";
+  let total = 0;
+
+  if (carrito.length === 0) {
+    resumenEntrada.innerHTML = `
+      <tr id="mensajeResumenVacio">
+        <td colspan="3" style="text-align:center; font-style: italic; color: gray;">No se han agregado productos al resumen.</td>
+      </tr>
+    `;
+  } else {
+    carrito.forEach((item, index) => {
+      const subtotal = item.producto.precio_unitario * item.cantidad;
+      total += subtotal;
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${item.producto.nombre}</td>
+        <td><input type="number" value="${item.cantidad}" min="1" max="10000" class="cantidad-input" data-index="${index}" /></td>
+        <td><button type="button" onclick="quitarProducto(${index})">Quitar</button></td>
+      `;
+      resumenEntrada.appendChild(row);
+    });
+  }
+
+  totalVenta.textContent = total.toFixed(2);
+
+  const productosParaEnviar = carrito.map((item) => ({
+    ...item.producto,
+    cantidad: item.cantidad,
+  }));
+  productosInput.value = JSON.stringify(productosParaEnviar);
+  hiddenTotal.value = total.toFixed(2);
+
+  document.querySelectorAll(".cantidad-input").forEach((input) => {
+    input.addEventListener("change", actualizarCantidad);
+  });
+}
+
+
+    function actualizarCantidad(e) {
+      const index = parseInt(e.target.dataset.index);
+      const nuevaCantidad = parseInt(e.target.value);
+
+      if (!nuevaCantidad || nuevaCantidad < 1) {
+        alert("La cantidad debe ser un número mayor o igual a 1.");
+        e.target.value = carrito[index].cantidad; // Restaurar cantidad anterior
+        return;
+      }
+
+      carrito[index].cantidad = nuevaCantidad;
+      renderResumenEntrada();
+    }
+
+      // Función para quitar un producto del carrito
+      function quitarProducto(index) {
+        if (index >= 0 && index < carrito.length) {
+          carrito.splice(index, 1)
+          renderResumenEntrada()
+        }
+      }
+
+      // Evento para buscar productos
+      buscarInput.addEventListener("input", (e) => {
+        const query = e.target.value.toLowerCase() // Obtener el valor de búsqueda
+        const idProveedor = parseInt(proveedorSelect.value)
+        const proveedor = proveedores.find(
+          (p) => p.id_proveedor === idProveedor
+        )
+
+        const productosFiltrados = productos.filter((p) => {
+          return (
+            p.nombre.toLowerCase().includes(query) &&
+            p.proveedor === proveedor.id_proveedor
+          )
+        })
+
+        // Renderizar la tabla con los productos filtrados
+        renderTablaBusqueda(productosFiltrados, productosEnCurso)
+      })
+
+      // Validar formulario antes de enviar
+      const form = document.querySelector(".orden-form")
+      const submitButton = document.querySelector(".submit-button")
+
+form.addEventListener("submit", function (e) {
+  const proveedorSeleccionado = proveedorSelect.value;
+  if (!proveedorSeleccionado) {
+    alert("Por favor, seleccione un proveedor.");
+    e.preventDefault();
+    return;
+  }
+
+  if (carrito.length === 0) {
+    alert("Debe agregar al menos un producto al resumen de entrada.");
+    e.preventDefault();
+    return;
+  }
+
+  // Validar cantidades antes de enviar
+  const cantidadesValidas = carrito.every(item => Number.isInteger(item.cantidad) && item.cantidad > 0);
+  if (!cantidadesValidas) {
+    alert("Todos los productos deben tener una cantidad válida (mayor o igual a 1).");
+    e.preventDefault();
+    return;
+  }
+
+  submitButton.textContent = "Registrando...";
+  submitButton.disabled = true;
+})
+
+async function mostrarModalOrden(idProducto) {
+  try {
+    const res = await fetch(`/ordenes/producto/${idProducto}`);
+    if (!res.ok) throw new Error("No se encontró la orden");
+
+    const datos = await res.json();
+    console.log(datos)
+    const fechaFormateada = new Date(datos.fecha).toLocaleDateString("es-PE", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+
+    // Llenar los elementos del modal
+    document.querySelector("#modalOrden .modal-content h2").textContent =
+      `Detalle de Orden N.º ${datos.id_orden}`;
+    document.querySelector("#modalOrden .modal-content .proveedor").textContent =
+      `Proveedor: ${datos.proveedor}`;
+    document.querySelector("#modalOrden .modal-content .fecha").textContent =
+      `Fecha: ${fechaFormateada}`;
+
+
+    // Lista de productos
+    const lista = document.querySelector("#modalOrden .modal-content .lista-productos");
+    lista.innerHTML = "";
+    datos.productos.forEach(p => {
+      const li = document.createElement("li");
+      li.textContent = `${p.nombre} - ${p.cantidad} unidades`;
+      lista.appendChild(li);
+    });
+
+    // Mostrar el modal
+    document.getElementById("modalOrden").classList.remove("hidden");
+
+  } catch (error) {
+    console.error("Error al obtener orden:", error);
+    alert("No se pudo obtener la orden en curso para este producto.");
+  }
+}
+
+
+function cerrarModalOrden() {
+  const modal = document.getElementById("modalOrden");
+  modal.classList.add("hidden");
+}
+window.mostrarModalOrden = mostrarModalOrden;
+if (!proveedorSelect.value) {
+  tablaProductos.innerHTML = `<tr><td colspan="3" style="text-align:center; font-style: italic; color: gray;">Seleccione un proveedor para ver los productos</td></tr>`;
+}
+    </script>

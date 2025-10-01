@@ -1,0 +1,168 @@
+<head>
+    <link rel="stylesheet" href="/listarIncidencias.css">
+    <style>
+      .btn-limpiar {
+  margin-left: 1rem;
+  padding: 6px 12px;
+  background-color: #eee;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-limpiar:hover {
+  background-color: #ddd;
+}
+    </style>
+</head>
+<div class="container mt-4">
+  <h2 class="mb-4">Listado de Incidencias</h2>
+
+<div class="filtros-barra">
+    <!-- Barra de búsqueda a la izquierda -->
+    <div class="filtro-busqueda">
+    <input type="number" id="filtro-id" placeholder="Buscar orden por ID" inputmode="numeric" pattern="[0-9]*" />
+
+</div>
+
+    <!-- Filtros alineados a la derecha -->
+    <div class="filtros-derecha">
+        <select id="filtro-fecha">
+            <option value="">Todas las fechas</option>
+            <option value="7">Últimos 7 días</option>
+            <option value="30">Últimos 30 días</option>
+            <option value="90">Últimos 3 meses</option>
+        </select>
+
+        <!-- Agrupación con etiqueta -->
+        <div class="filtro-rango-fechas">
+            <label for="filtro-desde">Filtrar por rango:</label>
+            <input type="date" id="filtro-desde" />
+            <input type="date" id="filtro-hasta" />
+        </div>
+
+            <button id="btn-limpiar-filtros" class="btn-limpiar">
+      🧹 Limpiar filtros
+    </button>
+    </div>
+</div>
+
+  <table class="table table-bordered table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>ID Orden</th>
+        <th>Fecha</th>     <!-- Nuevo -->
+        <th>Hora</th>      <!-- Nuevo -->
+        <th>ID Movimiento</th>
+        <th>Detalle Productos</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (incidencias.length === 0) { %>
+        <tr>
+          <td colspan="6" class="text-center">No hay incidencias registradas.</td>
+        </tr>
+      <% } else { %>
+        <% incidencias.forEach(inc => { %>
+          <tr>
+            <td><%= inc.id_orden || '—' %></td>
+            <td><%= new Date(inc.fecha).toLocaleDateString('es-PE', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
+            }) %></td>
+            <td><%= new Date(inc.fecha).toLocaleTimeString('es-PE', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false
+            }) %></td>
+            <td><%= inc.id_movimiento %></td>
+            <td>
+            <ul class="mb-0">
+                <% inc.detalle_productos.forEach(p => { %>
+                <li>  <strong><%= p.nombre %></strong> (x<%= p.cantidad %>)  
+                <br>
+                <small class="text-danger">↪ <%= p.incidencia %></small></li>
+                <% }) %>
+            </ul>
+            </td>
+            <td>
+              <a href="/incidencias/<%= inc.id_incidencia %>" class="btn btn-sm btn-primary">Descargar</a>
+            </td>
+          </tr>
+        <% }) %>
+      <% } %>
+        <tr id="fila-sin-incidencias" style="display: none;">
+    <td colspan="6" class="text-center text-muted">No se encontraron incidencias con los filtros aplicados.</td>
+  </tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const filtroId = document.getElementById('filtro-id');
+  const filtroFecha = document.getElementById('filtro-fecha');
+  const filtroDesde = document.getElementById('filtro-desde');
+  const filtroHasta = document.getElementById('filtro-hasta');
+  const filaSinIncidencias = document.getElementById('fila-sin-incidencias');
+
+  const filas = Array.from(document.querySelectorAll('table tbody tr')).filter(
+    tr => tr.id !== 'fila-sin-incidencias' && tr.cells.length > 1
+  );
+
+  const hoy = new Date();
+  const hoyISO = hoy.toISOString().split("T")[0];
+  filtroDesde.max = hoyISO;
+  filtroHasta.max = hoyISO;
+
+  function filtrar() {
+    const idFiltro = filtroId.value.trim();
+    const diasFiltro = parseInt(filtroFecha.value);
+    const desde = filtroDesde.value ? new Date(filtroDesde.value) : null;
+    const hasta = filtroHasta.value ? new Date(filtroHasta.value) : null;
+    if (hasta) hasta.setHours(23, 59, 59, 999);
+
+    let visibles = 0;
+
+    filas.forEach(fila => {
+      const celdas = fila.querySelectorAll('td');
+      const idOrden = celdas[0].textContent.trim();
+      const fechaTexto = celdas[1].textContent.trim(); // DD/MM/YYYY
+
+      const partes = fechaTexto.split('/');
+      const fecha = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+
+      let visible = true;
+
+      if (idFiltro && !idOrden.includes(idFiltro)) visible = false;
+      if (!isNaN(diasFiltro)) {
+        const limite = new Date(hoy.getTime() - diasFiltro * 86400000);
+        if (fecha < limite) visible = false;
+      }
+      if (desde && fecha < desde) visible = false;
+      if (hasta && fecha > hasta) visible = false;
+
+      fila.style.display = visible ? '' : 'none';
+      if (visible) visibles++;
+    });
+
+    filaSinIncidencias.style.display = visibles === 0 ? '' : 'none';
+  }
+
+  // Eventos
+  filtroId.addEventListener('input', filtrar);
+  filtroFecha.addEventListener('change', filtrar);
+  filtroDesde.addEventListener('change', filtrar);
+  filtroHasta.addEventListener('change', filtrar);
+
+  const btnLimpiar = document.getElementById('btn-limpiar-filtros');
+  btnLimpiar.addEventListener('click', () => {
+    filtroId.value = '';
+    filtroFecha.value = '';
+    filtroDesde.value = '';
+    filtroHasta.value = '';
+    filtrar();
+  });
+</script>

@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="shortcut icon" href="/favicon/favicon.ico">
+    <title>Registrar Nueva Venta</title>
+    <link rel="stylesheet" href="/registrarVenta.css" />
+  </head>
+  <body>
+    <div class="venta-container">
+      <a href="/movimientos">←Atrás</a>
+
+      <h1 class="title">Registrar Venta</h1>
+
+      <form action="/movimientos/registrar-venta" method="POST" class="venta-form">
+        <!-- Tipo de Comprobante -->
+        <div class="seccion tipo-comprobante">
+          <h3>
+            <svg
+              class="icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"
+              ></path>
+            </svg>
+            Tipo de Comprobante
+          </h3>
+          <div class="radio-group">
+            <label class="radio-container">
+              <input
+                type="radio"
+                name="tipo_comprobante"
+                value="boleta"
+                checked
+              />
+              <span class="radio-checkmark"></span>
+              Boleta
+            </label>
+            <label class="radio-container">
+              <input type="radio" name="tipo_comprobante" value="factura" />
+              <span class="radio-checkmark"></span>
+              Factura
+            </label>
+          </div>
+        </div>
+
+        <!-- Datos del Cliente (Boleta) -->
+        <div class="seccion datos-cliente" id="datosBoleta">
+          <h3>
+            <svg
+              class="icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              ></path>
+            </svg>
+            Datos del Cliente (Boleta)
+          </h3>
+          <div class="input-group">
+            <label for="cliente_nombre">Nombre:</label>
+            <input
+              type="text"
+              name="cliente_nombre"
+              id="cliente_nombre"
+              class="input-field"
+              placeholder="Ingrese nombre completo"
+              
+            />
+          </div>
+          <div class="input-group">
+            <label for="cliente_dni">DNI:</label>
+            <input
+              type="text"
+              name="cliente_dni"
+              id="cliente_dni"
+              maxlength="8"
+              pattern="\d{8}"
+              class="input-field"
+              placeholder="Ingrese DNI (8 dígitos)"
+              
+            />
+          </div>
+        </div>
+
+        <!-- Datos del Cliente (Factura) -->
+        <div
+          class="seccion datos-cliente"
+          id="datosFactura"
+          style="display: none"
+        >
+          <h3>
+            <svg
+              class="icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              ></path>
+            </svg>
+            Datos del Cliente (Factura)
+          </h3>
+          <div class="input-group">
+            <label for="razon_social">Razón Social:</label>
+            <input
+              type="text"
+              name="razon_social"
+              id="razon_social"
+              class="input-field"
+              placeholder="Ingrese razón social"
+              
+            />
+          </div>
+          <div class="input-group">
+            <label for="cliente_ruc">RUC:</label>
+            <input
+              type="text"
+              name="cliente_ruc"
+              id="cliente_ruc"
+              maxlength="11"
+              pattern="\d{11}"
+              class="input-field"
+              placeholder="Ingrese RUC (11 dígitos)"
+              
+            />
+          </div>
+        </div>
+
+        <div class="seccion">
+          <div class="input-group">
+            <h3>
+              <label for="direccion_cliente">
+                <svg
+                  class="icon"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 11.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19.5 10c0 7.5-7.5 11-7.5 11S4.5 17.5 4.5 10a7.5 7.5 0 1115 0z"
+                  />
+                </svg>
+                <span style="font-weight: bold; font-size: 18px; color: #4a6de5"
+                >Dirección</span</label
+              >
+            </h3>
+            <input
+              type="text"
+              name="direccion_cliente"
+              id="direccion_cliente"
+              class="input-field"
+              placeholder="Ingrese dirección completa"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Correo del Cliente -->
+        <div class="seccion">
+          <div class="input-group">
+            <label for="correo_cliente">
+              <svg
+                class="icon"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                ></path>
+              </svg>
+              <span style="font-weight: bold; font-size: 18px; color: #4a6de5"
+                >Correo</span
+              >
+            </label>
+            <input
+              type="email"
+              name="correo_cliente"
+              id="correo_cliente"
+              required
+              class="input-field"
+              placeholder="ejemplo@correo.com"
+            />
+          </div>
+        </div>
+
+        <!-- Buscar y Agregar Productos -->
+        <div class="seccion productos">
+          <h3>
+            <svg
+              class="icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              ></path>
+            </svg>
+            Productos
+          </h3>
+          <div class="search">
+            <input
+              type="text"
+              id="buscarProducto"
+              class="search-input"
+              placeholder="Buscar producto..."
+            />
+          </div>
+          <table class="productos-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tablaProductos">
+              <!-- Productos se cargarán dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Resumen de Venta -->
+        <div class="seccion resumen-venta">
+          <h3>
+            <svg
+              class="icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              ></path>
+            </svg>
+            Resumen de Venta
+          </h3>
+          <table class="resumen-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+                <th>Quitar</th>
+              </tr>
+            </thead>
+            <tbody id="resumenVenta">
+              <!-- Productos agregados se mostrarán aquí -->
+            </tbody>
+          </table>
+          <div class="total-container">
+            <p class="total-text">
+              Total: S/. <span id="totalVenta">0.00</span>
+            </p>
+          </div>
+          <input
+            type="hidden"
+            name="productos"
+            id="productos-seleccionados"
+            class="productos-seleccionados"
+          />
+          <input
+            type="hidden"
+            name="total"
+            id="input-total"
+            class="input-total"
+          />
+        </div>
+
+        <!-- Descripción -->
+        <div class="seccion descripcion">
+          <div class="input-group">
+            <label for="descripcion">
+              <svg
+                class="icon"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                ></path>
+              </svg>
+              Descripción (opcional):
+            </label>
+            <textarea
+              name="descripcion"
+              id="descripcion"
+              rows="4"
+              cols="50"
+              placeholder="Agrega una breve descripción de la venta"
+              class="textarea-field"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Botón de Enviar -->
+        <div class="seccion submit-btn">
+          <button type="submit" class="submit-button btn-primary" id="submitBtn">Registrar Venta</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Productos disponibles en JSON -->
+    <script id="productos-data" type="application/json">
+      <%- JSON.stringify(productos) %>
+    </script>
+    <script>
+      const productos = JSON.parse(
+        document.getElementById("productos-data").textContent
+      )
+      const tablaProductos = document.getElementById("tablaProductos")
+      const buscarInput = document.getElementById("buscarProducto")
+      const resumenVenta = document.getElementById("resumenVenta")
+      const totalVenta = document.getElementById("totalVenta")
+      const productosInput = document.querySelector(".productos-seleccionados")
+      const hiddenTotal = document.querySelector(".input-total")
+      const radios = document.querySelectorAll('input[name="tipo_comprobante"]')
+      const datosBoleta = document.getElementById("datosBoleta")
+      const datosFactura = document.getElementById("datosFactura")
+      const carrito = []
+      
+      // Tabla donde buscaremos los productos
+      function renderTablaBusqueda(filtrados) {
+        // Pasamos una lista de productos filtrados
+        tablaProductos.innerHTML = ""
+        if (filtrados.length === 0) {
+          // Si no existe el producto buscado, se pone un mensaje de error
+          tablaProductos.innerHTML = `<tr><td colspan="3">No se encontraron productos</td></tr>`
+          return
+        }
+
+        // De lo contrario, para cada producto se crea un row con nombre, precio y boton de agregar
+        filtrados.forEach((prod) => {
+          const row = document.createElement("tr")
+          row.innerHTML = `
+            <td>${prod.nombre}
+            <td>S/. ${prod.precio_unitario}</td>
+            <td><button type="button" onclick="agregarProducto(${prod.id_producto})">Agregar</button></td>
+          `
+          // Si se clickea el producto, se invoca la funcion agregar producto con el id del mismo
+          tablaProductos.appendChild(row) // Agaregamos la fila a la tabla
+        })
+      }
+
+      //Funcion para actualizar el resumen de compra
+      function actualizarResumen() {
+        resumenVenta.innerHTML = "" // Tabla del resumen de ventas con los productos seleccionados
+        let total = 0 // Total de la compra
+        carrito.forEach((item, idx) => {
+          // Para cada item del carrito
+          const subtotal = item.cantidad * item.precio_unitario // Calculo del subtotal
+          total += subtotal // Se actualiza el total como suma de subtotales
+          const row = document.createElement("tr")
+          //Nueva fila con el nombre, precio unitario, un input para actualizar la cantidad y un boton para quitar el producto del carrito
+          row.innerHTML = `
+              <td>${item.nombre}</td>
+              <td>S/. ${item.precio_unitario}</td>
+                <td>
+                  <input type="number" min="1" max="${item.stock}" value="${
+                    item.cantidad
+                  }" oninput="validarCantidad(this, ${idx})" />
+                </td>
+              <td>S/. ${subtotal.toFixed(2)}</td>
+              <td><button type="button" onclick="quitarProducto(${idx})">X</button></td>
+            `
+          resumenVenta.appendChild(row)
+        })
+
+        totalVenta.textContent = total.toFixed(2) // Se actualiza el display del total
+        hiddenTotal.value = total.toFixed(2) // El valor a pasar de total venta al endpoint se actualiza
+        productosInput.value = JSON.stringify(carrito) // Se actualizan los productos pasados al server
+      }
+
+
+      function validarCantidad(input, index) {
+        // Clear any previous validation message
+        input.setCustomValidity('')
+        if (input.value === '') {
+            return;
+          }
+
+        // Validate the input
+        if (input.validity.rangeUnderflow) {
+          input.setCustomValidity('La cantidad mínima permitida es 1')
+        } else if (input.validity.rangeOverflow) {
+          input.setCustomValidity(`No hay suficiente stock (máximo: ${input.max})`)
+        } else if (input.validity.badInput) {
+          input.setCustomValidity('Ingrese un número válido')
+        }
+        
+        // Check if the input is valid
+        if (input.checkValidity()) {
+          // If valid, update the quantity
+          cambiarCantidad(index, input.value)
+        } else {
+          // If invalid, show the validation message
+          input.reportValidity()
+          // Reset to previous valid value
+          input.value = carrito[index].cantidad
+        }
+      }
+
+      // Funcion para agregar producto
+      function agregarProducto(id) {
+        const prod = productos.find((p) => p.id_producto === id) // Extraemos le producto con el mismo id de la list ade productos
+        const existente = carrito.find((p) => p.id_producto === id) // Se busca el producto en el carrito
+        if (existente) {
+          existente.cantidad += 1 // Si existe, se le añade uno a su cantidad
+        } else {
+          carrito.push({ ...prod, cantidad: 1 }) // Si no existe, se suma al carrito y la cantidad se incializa en 1
+        }
+        actualizarResumen()
+      }
+
+      // Funcion para quitar un producto
+      function quitarProducto(index) {
+        carrito.splice(index, 1)
+        actualizarResumen()
+      }
+
+      // Función para cambiar cantidad de un producto
+      function cambiarCantidad(index, nuevaCantidad) {
+        // Verify if the value is a valid number and greater than 0
+        const cantidad = parseInt(nuevaCantidad)
+        if (!isNaN(cantidad) && cantidad > 0) {
+          carrito[index].cantidad = cantidad
+
+          // Update only the subtotal for this row
+          const fila = resumenVenta.children[index]
+          const subtotal = cantidad * carrito[index].precio_unitario
+          fila.querySelector(
+            "td:nth-child(4)"
+          ).textContent = `S/. ${subtotal.toFixed(2)}`
+
+          // Recalculate and update the total
+          const total = carrito.reduce(
+            (acc, item) => acc + item.cantidad * item.precio_unitario,
+            0
+          )
+          totalVenta.textContent = total.toFixed(2)
+          hiddenTotal.value = total.toFixed(2)
+          productosInput.value = JSON.stringify(carrito)
+        }
+      }
+
+
+      // Función para actualizar los campos requeridos
+        function actualizarCamposRequeridos() {
+          const tipoComprobante = document.querySelector('input[name="tipo_comprobante"]:checked').value;
+          
+          if (tipoComprobante === 'boleta') {
+            // Campos de boleta
+            document.getElementById('cliente_nombre').required = true;
+            document.getElementById('cliente_dni').required = true;
+            
+            // Campos de factura
+            document.getElementById('razon_social').required = false;
+            document.getElementById('cliente_ruc').required = false;
+            
+            // Limpiar campos no requeridos
+            document.getElementById('razon_social').value = '';
+            document.getElementById('cliente_ruc').value = '';
+          } else {
+            // Campos de factura
+            document.getElementById('razon_social').required = true;
+            document.getElementById('cliente_ruc').required = true;
+            
+            // Campos de boleta
+            document.getElementById('cliente_nombre').required = false;
+            document.getElementById('cliente_dni').required = false;
+            
+            // Limpiar campos no requeridos
+            document.getElementById('cliente_nombre').value = '';
+            document.getElementById('cliente_dni').value = '';
+          }
+        }
+
+      buscarInput.addEventListener("input", () => {
+        const texto = buscarInput.value.toLowerCase()
+        const filtrados = productos.filter((p) =>
+          p.nombre.toLowerCase().includes(texto)
+        )
+        renderTablaBusqueda(filtrados)
+      })
+
+      radios.forEach((radio) => {
+        radio.addEventListener("change", () => {
+          if (radio.value === "boleta") {
+            datosBoleta.style.display = "block"
+            datosFactura.style.display = "none"
+            document.getElementById('razon_social').value = ''
+            document.getElementById('cliente_ruc').value = ''
+          } else {
+            datosBoleta.style.display = "none"
+            datosFactura.style.display = "block"
+            document.getElementById('cliente_nombre').value = ''
+            document.getElementById('cliente_dni').value = ''
+          }
+        })
+      })
+      
+      resumenVenta.addEventListener('blur', function(e) {
+        const input = e.target;
+        // Only handle quantity inputs in the cart
+        if (input.matches('input[type="number"]')) {
+          // If empty or invalid, reset to last valid value
+          if (input.value === '' || parseInt(input.value) < 1) {
+            const row = input.closest('tr');
+            const index = Array.from(resumenVenta.querySelectorAll('tr')).indexOf(row);
+            if (index >= 0 && carrito[index]) {
+              input.value = carrito[index].cantidad;
+            }
+          }
+        }
+      }, true);
+      // Mostrar todos al inicio
+      renderTablaBusqueda(productos)
+       // Escuchar cambios en los radio buttons
+       document.querySelectorAll('input[name="tipo_comprobante"]').forEach(radio => {
+          radio.addEventListener('change', actualizarCamposRequeridos);
+        });
+
+        // Inicializar al cargar la página
+        document.addEventListener('DOMContentLoaded', actualizarCamposRequeridos);
+
+        const form = document.querySelector(".venta-form")
+        const submitBtn = document.getElementById("submitBtn")
+        form.addEventListener("submit", function(e) {
+          if (carrito.length === 0) {
+            e.preventDefault();
+            
+            // 1. Mostrar mensaje de error
+            alert('Error: Debe agregar al menos un producto al carrito');
+            
+            // 2. Resaltar visualmente la sección de productos
+            const seccionProductos = document.querySelector('.seccion.productos');
+            seccionProductos.style.border = '2px solid #ff4444';
+            seccionProductos.style.borderRadius = '8px';
+            seccionProductos.style.transition = 'border 0.5s ease'; // Transición suave
+            
+            // 3. Hacer scroll a la sección de productos
+            seccionProductos.scrollIntoView({ behavior: 'smooth' });
+            
+            // 4. Agregar animación temporal
+            seccionProductos.animate([
+              { transform: 'translateX(0)' },
+              { transform: 'translateX(-10px)' },
+              { transform: 'translateX(10px)' },
+              { transform: 'translateX(0)' }
+            ], {
+              duration: 300,
+              iterations: 2
+            });
+            
+            // 5. Quitar el borde después de 3 segundos (3000 milisegundos)
+            setTimeout(() => {
+              seccionProductos.style.border = ''; // Elimina el borde
+              seccionProductos.style.borderRadius = ''; // Elimina el borde redondeado
+            }, 1000);
+            
+            return false;
+          }
+          
+          // Continuar con el envío si hay productos
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span class="spinner"></span> Procesando...';
+        });
+
+          document.addEventListener("DOMContentLoaded", function () {
+          const form = document.querySelector(".venta-form");
+
+          form.addEventListener("submit", function (event) {
+            if (!form.checkValidity()) {
+              event.preventDefault(); // Evita que se envíe si es inválido
+              event.stopPropagation();
+            }
+
+            form.classList.add("was-validated");
+          });
+        });
+    </script>
+  </body>
+</html>

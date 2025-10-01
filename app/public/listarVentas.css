@@ -1,0 +1,77 @@
+/* Estilos generales */
+body {
+  font-family: "Arial", sans-serif;
+  background-color: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  color: #3949ab;
+  font-size: 24px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e8eaf6;
+}
+
+/* Tabla */
+.ventas-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.ventas-table th {
+  background-color: #3949ab;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+.ventas-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.ventas-table tr:hover {
+  background-color: #f3f5f8;
+}
+
+/* Botones */
+.btn-nueva-venta {
+  background-color: #3949ab;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+.btn-detalle {
+  background-color: #3949ab;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.btn-nueva-venta:hover,
+.btn-detalle:hover {
+  background-color: #283593;
+}

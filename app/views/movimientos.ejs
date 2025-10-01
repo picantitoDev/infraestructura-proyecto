@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicon/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <title>Gestión de Movimientos</title>
+    <link rel="stylesheet" href="/listarMovimientos.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1 class="header-title">Movimientos</h1>
+        <div></div>
+      </div>
+
+      <div class="action-links">
+        <a href="/movimientos/registrar-venta" class="venta">
+          <i class="fas fa-shopping-cart"></i>
+          Nueva Venta
+        </a>
+        <a href="/movimientos/registrar-entrada" class="entrada">
+          <i class="fas fa-arrow-down"></i>
+          Nueva Entrada
+        </a>
+
+        <% if (user.rol === 'Admin') { %>
+          <a href="/movimientos/registrar-sobrante" class="sobrante">
+            <i class="fas fa-plus-circle"></i>
+            Nuevo Sobrante
+          </a>
+          <a href="/movimientos/registrar-merma" class="merma">
+            <i class="fas fa-minus-circle"></i>
+            Nueva Merma
+          </a>
+        <% } %>
+      </div>
+
+
+      <div class="movimientos-list">
+        <div class="section-header">
+          <h2>Movimientos Recientes</h2>
+        </div>
+
+<div class="filtros-barra">
+    <!-- Barra de búsqueda a la izquierda -->
+    <div class="filtro-busqueda">
+        <input type="text" id="filtro-id" placeholder="Buscar por ID" />
+    </div>
+
+    <!-- Filtros alineados a la derecha -->
+    <div class="filtros-derecha">
+        <select id="filtro-tipo">
+            <option value="">Todos los tipos</option>
+            <option value="Venta">Venta</option>
+            <option value="Compra">Entrada</option>
+            <option value="Merma">Merma</option>
+            <option value="Sobrante">Sobrante</option>
+        </select>
+
+        <select id="filtro-fecha">
+            <option value="">Todas las fechas</option>
+            <option value="7">Últimos 7 días</option>
+            <option value="30">Últimos 30 días</option>
+            <option value="90">Últimos 3 meses</option>
+        </select>
+
+        <!-- Agrupación con etiqueta -->
+        <div class="filtro-rango-fechas">
+            <label for="filtro-desde">Filtrar por rango:</label>
+            <input type="date" id="filtro-desde" />
+            <input type="date" id="filtro-hasta" />
+        </div>
+        
+        <button id="btn-limpiar-filtros" class="btn-limpiar">
+          🧹 Limpiar filtros
+        </button>
+
+        <button id="btn-exportar" class="btn-exportar">
+          📤 Exportar
+        </button>
+    </div>
+</div>
+
+
+
+        <div class="table-container">
+          <div class="table-header">
+            <div class="table-row">
+              <div class="table-cell">ID</div>
+              <div class="table-cell">Fecha</div>
+              <div class="table-cell">Hora</div>
+              <div class="table-cell">Tipo</div>
+              <div class="table-cell">Usuario</div>
+              <div class="table-cell">Acciones</div>
+            </div>
+          </div>
+          <div class="table-body">
+            <p id="sin-resultados" style="text-align: center; margin-top: 1rem; margin-bottom: 1rem; color: #888; display: none;">
+            No se encontraron movimientos.
+          </p>
+
+            <% movimientos.forEach((movimiento) => { const fecha = new
+            Date(movimiento.fecha); const fechaStr =
+            fecha.toLocaleDateString('es-PE', { day: '2-digit', month:
+            '2-digit', year: 'numeric' }); const horaStr =
+            fecha.toLocaleTimeString('es-PE', { hour: '2-digit', minute:
+            '2-digit', hour12: false }); %>
+            <div class="movimiento-item table-row">
+              <div class="table-cell"><%= movimiento.id_movimiento %></div>
+              <div class="table-cell"><%= fechaStr %></div>
+              <div class="table-cell"><%= horaStr %></div>
+              <div class="table-cell">
+                <% if (movimiento.tipo === 'Venta') { %>
+                <span class="badge badge-venta" data-tipo="<%= movimiento.tipo %>">Venta</span>
+                <% } else if (movimiento.tipo === 'Compra') { %>
+                <span class="badge badge-entrada" data-tipo="<%= movimiento.tipo %>">Entrada</span>
+                <% } else if (movimiento.tipo === 'Merma') { %>
+                <span class="badge badge-merma" data-tipo="<%= movimiento.tipo %>">Merma</span>
+                <% } else if (movimiento.tipo === 'Sobrante') { %>
+                <span class="badge badge-sobrante" data-tipo="<%= movimiento.tipo %>">Sobrante</span>
+                <% } else { %>
+                <span class="badge"><%= movimiento.tipo %></span>
+                <% } %>
+              </div>
+              <div class="table-cell">
+                <% const usuario = usuarios.find(user => user.id ===
+                movimiento.id_usuario); if (usuario) { %> <%= usuario.username
+                %>
+                <!-- O cualquier otra propiedad que quieras mostrar -->
+                <% } else { %> Usuario no encontrado <% } %>
+              </div>
+              <div class="table-cell">
+                <a
+                  href="/movimientos/detalle/<%= movimiento.id_movimiento %>"
+                  class="view-detail"
+                >
+                  Ver Detalle <i class="fas fa-chevron-right"></i>
+                </a>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <div id="modal-exportar" class="modal">
+  <div class="modal-contenido">
+    <span class="cerrar" id="cerrar-modal">&times;</span>
+    <h2>Exportar movimientos</h2>
+    <form id="form-exportar" method="GET" action="/movimientos/exportar">
+      <div class="form-group">
+        <label for="tipo">Tipo de movimiento:</label>
+        <select name="tipo" id="tipo">
+          <option value="Todos" selected="selected">Todos</option>
+          <option value="Venta">Venta</option>
+          <option value="Compra">Entrada</option>
+          <option value="Merma">Merma</option>
+          <option value="Sobrante">Sobrante</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="desde">Fecha desde:</label>
+        <input type="date" id="desde" name="desde">
+      </div>
+
+      <div class="form-group">
+        <label for="hasta">Fecha hasta:</label>
+        <input type="date" id="hasta" name="hasta">
+      </div>
+
+      <button type="submit" id="btnSubmitExportar" class="btn-confirmar">Exportar Excel</button>
+    </form>
+  </div>
+</div>
+    <script>
+  const btnExportar = document.getElementById("btn-exportar");
+  const modalExportar = document.getElementById("modal-exportar");
+  const cerrarModal = document.getElementById("cerrar-modal");
+  const btnSubmit = document.getElementById("btnSubmitExportar");
+  btnExportar.addEventListener("click", () => {
+    modalExportar.style.display = "block";
+  });
+
+  cerrarModal.addEventListener("click", () => {
+    modalExportar.style.display = "none";
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target === modalExportar) {
+      modalExportar.style.display = "none";
+    }
+  });
+
+  const formExportar = document.getElementById("form-exportar");
+
+  const today = new Date().toISOString().split("T")[0];
+
+    document.getElementById("desde").max = today;
+    document.getElementById("hasta").max = today;
+  
+formExportar.addEventListener("submit", function (e) {
+  const tipo = document.getElementById("tipo").value;
+  const desde = document.getElementById("desde").value;
+  const hasta = document.getElementById("hasta").value;
+
+  if (!tipo || !desde || !hasta) {
+    e.preventDefault();
+    alert("Por favor, seleccione un rango de fechas.");
+    return;
+  }
+
+  const fechaDesde = new Date(desde);
+  const fechaHasta = new Date(hasta);
+
+  if (fechaDesde > fechaHasta) {
+    e.preventDefault();
+    alert("La fecha 'desde' no puede ser mayor que la fecha 'hasta'.");
+    return;
+  }
+
+    btnSubmit.disabled = true;
+  btnSubmit.textContent = "Generando...";
+  setTimeout(() => {
+    formExportar.reset(); // Limpia todos los inputs del formulario
+    modalExportar.style.display = "none"; // Cierra el modal
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = "Exportar Excel";
+  }, 1500); // Tiempo suficiente para iniciar la descarga
+});
+</script>
+
+
+  <script>
+    const filtroId = document.getElementById('filtro-id');
+const filtroTipo = document.getElementById('filtro-tipo');
+const filtroFecha = document.getElementById('filtro-fecha');
+const filtroDesde = document.getElementById('filtro-desde');
+const filtroHasta = document.getElementById('filtro-hasta');
+const hoy = new Date().toISOString().split("T")[0];
+
+    filtroDesde.max = hoy;
+    filtroHasta.max = hoy;
+
+const movimientos = document.querySelectorAll('.movimiento-item');
+
+function filtrar() {
+  const idFiltro = filtroId.value.trim();
+  const tipoFiltro = filtroTipo.value;
+  const diasFiltro = parseInt(filtroFecha.value);
+
+  const desde = filtroDesde.value ? new Date(filtroDesde.value) : null;
+  const hasta = filtroHasta.value ? new Date(filtroHasta.value) : null;
+  if (hasta) hasta.setHours(23, 59, 59, 999); // incluir el final del día
+  
+  if (desde && hasta && desde > hasta) {
+    alert("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.");
+    filtroHasta.value = "";
+    return;
+  }
+  const hoy = new Date();
+
+  movimientos.forEach(item => {
+    const id = item.querySelector('.table-cell:nth-child(1)').textContent.trim();
+    const fechaTexto = item.querySelector('.table-cell:nth-child(2)').textContent.trim();
+    const tipo = item.querySelector('.badge')?.dataset.tipo;
+
+    const partes = fechaTexto.split('/');
+    const fecha = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+
+    let visible = true;
+
+    if (idFiltro && !id.includes(idFiltro)) {
+      visible = false;
+    }
+
+    if (tipoFiltro && tipo !== tipoFiltro) {
+      visible = false;
+    }
+
+    if (!isNaN(diasFiltro)) {
+      const diasMs = diasFiltro * 24 * 60 * 60 * 1000;
+      if ((hoy - fecha) > diasMs) {
+        visible = false;
+      }
+    }
+
+    if (desde && fecha < desde) {
+      visible = false;
+    }
+
+    if (hasta && fecha > hasta) {
+      visible = false;
+    }
+
+    item.style.display = visible ? 'flex' : 'none';
+  });
+
+  const hayAlgunoVisible = Array.from(movimientos).some(
+  item => item.style.display !== 'none'
+);
+
+document.getElementById('sin-resultados').style.display = hayAlgunoVisible
+  ? 'none'
+  : 'block';
+}
+
+
+
+filtroId.addEventListener('input', filtrar);
+filtroTipo.addEventListener('change', filtrar);
+filtroFecha.addEventListener('change', filtrar);
+filtroDesde.addEventListener('change', filtrar);
+filtroHasta.addEventListener('change', filtrar);
+
+</script>
+
+<script>
+  const btnLimpiar = document.getElementById('btn-limpiar-filtros');
+
+  btnLimpiar.addEventListener('click', () => {
+    filtroId.value = '';
+    filtroTipo.value = '';
+    filtroFecha.value = '';
+    filtroDesde.value = '';
+    filtroHasta.value = '';
+    filtrar();
+  });
+</script>
+
+</html>

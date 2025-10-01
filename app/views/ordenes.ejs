@@ -1,0 +1,781 @@
+<head>
+  <link rel="stylesheet" href="/listarOrdenes.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+        /* Import the design system from your main CSS */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --primary-color: #3498db;
+      --primary-dark: #2980b9;
+      --accent-color: #2ecc71;
+      --accent-dark: #27ae60;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --gray-light: #f5f5f5;
+      --gray-medium: #e0e0e0;
+      --gray-dark: #718093;
+      --text-color: #2d3436;
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      --border-radius: 6px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f9fafb;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 20px 15px;
+    }
+
+    /* Page Header */
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    /* Alert Styles */
+    .alerta-stock {
+      background-color: rgba(231, 76, 60, 0.1);
+      border: 1px solid var(--danger-color);
+      color: var(--danger-color);
+      padding: 16px 20px;
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .alerta-stock.alerta-ok {
+      background-color: rgba(46, 204, 113, 0.1);
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Table Styles */
+    .tabla-ordenes {
+      width: 100%;
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border-collapse: collapse;
+      table-layout: fixed; /* Fixed table layout prevents column shifting */
+    }
+
+.tabla-ordenes th:nth-child(1),
+.tabla-ordenes td:nth-child(1) {
+  width: 9%;  /* ID Orden */
+}
+
+.tabla-ordenes th:nth-child(2),
+.tabla-ordenes td:nth-child(2) {
+  width: 17%; /* Proveedor */
+}
+
+.tabla-ordenes th:nth-child(3),
+.tabla-ordenes td:nth-child(3) {
+  width: 10%; /* Fecha */
+}
+
+.tabla-ordenes th:nth-child(4),
+.tabla-ordenes td:nth-child(4) {
+  width: 10%; /* Hora */
+}
+
+.tabla-ordenes th:nth-child(5),
+.tabla-ordenes td:nth-child(5) {
+  width: 12%; /* Estado */
+}
+
+.tabla-ordenes th:nth-child(6),
+.tabla-ordenes td:nth-child(6) {
+  width: 12%; /* Usuario */
+}
+
+.tabla-ordenes th:nth-child(7),
+.tabla-ordenes td:nth-child(7) {
+  width: 20%; /* Productos */
+}
+
+.tabla-ordenes th:nth-child(8),
+.tabla-ordenes td:nth-child(8) {
+  width: 10%; /* Detalle */
+}
+.btn-detalle {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 6px 12px;
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-size: 14px;
+  transition: var(--transition);
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-detalle:hover {
+  background-color: var(--accent-dark);
+}
+    .tabla-ordenes thead {
+      background-color: #f8f9fa;
+    }
+
+    .tabla-ordenes th {
+      padding: 16px;
+      font-weight: 600;
+      color: var(--gray-dark);
+      border-bottom: 1px solid var(--gray-medium);
+      font-size: 14px;
+      text-align: left;
+    }
+
+    .tabla-ordenes td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gray-light);
+      font-size: 14px;
+    }
+
+    .tabla-ordenes tbody tr:hover {
+      background-color: rgba(52, 152, 219, 0.05);
+    }
+
+    .tabla-ordenes tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Order Status Badge */
+    .estado-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background-color: var(--gray-light);
+      color: var(--gray-dark);
+    }
+
+    /* Toggle Products Button */
+    .btn-toggle-productos {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: rgba(52, 152, 219, 0.1);
+      color: var(--primary-color);
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-toggle-productos:hover {
+      background-color: rgba(52, 152, 219, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .btn-icon {
+      transition: transform 0.3s ease;
+    }
+
+    /* Expandable Product Rows */
+    .fila-productos {
+      display: none; /* Completely hidden, takes no space */
+    }
+    
+    .fila-productos.show {
+      display: table-row; /* Show as table row when clicked */
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    .fila-productos td {
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Product List */
+    .lista-productos {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .lista-productos li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      opacity: 0;
+      animation: fadeInUp 0.3s ease-in-out forwards;
+      animation-delay: calc(var(--i, 0) * 0.1s);
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .nombre-producto {
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    .cantidad-producto {
+      color: var(--gray-dark);
+      font-size: 13px;
+      background-color: var(--gray-light);
+      padding: 4px 8px;
+      border-radius: 12px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px 10px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .tabla-ordenes {
+        font-size: 13px;
+      }
+      
+      .tabla-ordenes th,
+      .tabla-ordenes td {
+        padding: 10px 8px;
+      }
+
+      .btn-crear-orden {
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+
+      /* Stack product info vertically on mobile */
+      .lista-productos li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .cantidad-producto {
+        align-self: flex-end;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .tabla-ordenes {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      .tabla-ordenes thead,
+      .tabla-ordenes tbody,
+      .tabla-ordenes th,
+      .tabla-ordenes td,
+      .tabla-ordenes tr {
+        display: block;
+      }
+
+      .tabla-ordenes thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+
+      .tabla-ordenes tr {
+        border: 1px solid var(--gray-medium);
+        margin-bottom: 10px;
+        border-radius: var(--border-radius);
+        background-color: white;
+      }
+
+      .tabla-ordenes td {
+        border: none;
+        position: relative;
+        padding-left: 50% !important;
+        white-space: normal;
+      }
+
+      .tabla-ordenes td:before {
+        content: attr(data-label) ": ";
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: 600;
+        color: var(--gray-dark);
+      }
+    }
+    /* Contenedor principal de filtros */
+.filtros-barra {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+/* Barra de búsqueda - ocupa 100% del ancho */
+.barra {
+  width: 100%;
+}
+
+.barra #filtro-busqueda {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #fff;
+  transition: border-color 0.3s ease;
+}
+
+.barra #filtro-busqueda:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.25);
+}
+
+/* Contenedor de filtros y acciones */
+.filtros-acciones {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Cambio de center a flex-start */
+  gap: 20px;
+}
+
+/* Filtros a la izquierda - en una sola línea */
+.m-i {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* Estilos para los selects */
+.filtro-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 14px;
+  min-width: 150px;
+  cursor: pointer;
+}
+
+.filtro-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* Contenedor del filtro de rango de fechas */
+.filtro-rango {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.filtro-rango label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.filtro-rango .filtro-input {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 12px;
+  width: 130px;
+}
+
+/* Botón crear orden a la derecha */
+.m-d {
+  margin-left: auto;
+  margin-top: 12px; /* Espacio hacia abajo */
+}
+
+/* Limpiar estilos duplicados del botón crear orden - usar solo los de las variables CSS */
+.filtros-barra .crear-orden-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.filtros-barra .btn-crear-orden {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgb(45, 154, 226);
+  color: white;
+  padding: 12px 24px;
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+  border: none;
+  cursor: pointer;
+}
+
+.filtros-barra .btn-crear-orden:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(97, 111, 175, 0.3);
+}
+
+.filtros-barra .btn-crear-orden i {
+  font-size: 16px;
+}
+
+.filtros-barra .icono-alerta {
+  color: var(--warning-color) !important;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .filtros-acciones {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  .m-i {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .filtro-select {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .filtro-rango {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .filtro-rango .filtro-input {
+    width: 100%;
+  }
+  
+  .m-d {
+    margin-left: 0;
+    margin-top: 0;
+  }
+  
+  .filtros-barra .btn-crear-orden {
+    justify-content: center;
+    width: 100%;
+  }
+}
+  </style>
+</head>
+<div class="container">   
+  <h1>Órdenes de Reabastecimiento</h1>
+
+  <% if (productosBajoStock > 0) { %>     
+    <div class="alerta-stock">       
+      🚨 Tienes <strong><%= productosBajoStock %></strong> producto(s) con stock bajo. ¡Necesitas crear una orden!     
+    </div>   
+  <% } else { %>     
+    <div class="alerta-stock alerta-ok">       
+      ✅ No tienes órdenes pendientes :)     
+    </div>   
+  <% } %>     
+    
+<div class="filtros-barra">
+  <div class="barra">
+    <input type="text" id="filtro-busqueda" placeholder="Buscar por ID o producto" class="filtro-input"/>
+  </div>
+
+  <div class="filtros-acciones">
+    <div class="m-i">
+      <select id="filtro-estado" class="filtro-select">
+        <option value="">Todos los estados</option>
+        <option value="en_curso">En curso</option>
+        <option value="finalizada">Finalizada</option>
+        <option value="cancelada">Cancelada</option>
+      </select>
+
+      <select id="filtro-fecha" class="filtro-select">
+        <option value="">Todas las fechas</option>
+        <option value="7">Últimos 7 días</option>
+        <option value="30">Últimos 30 días</option>
+        <option value="90">Últimos 3 meses</option>
+      </select>
+
+      <div class="filtro-rango">
+        <label for="filtro-desde">Desde:</label>
+        <input type="date" id="filtro-desde" class="filtro-input">
+        <label for="filtro-hasta">Hasta:</label>
+        <input type="date" id="filtro-hasta" class="filtro-input">
+      </div>
+
+      <button id="btn-limpiar-filtros" class="btn-crear-orden" style="background-color: #e0e0e0; color: #333;">
+        <i class="fas fa-broom"></i> Limpiar filtros
+      </button>
+    </div>
+
+    <div class="m-d">
+      <div class="crear-orden-container">
+        <% if (user.rol === 'Admin') { %>
+          <a href="/ordenes/nueva" class="btn-crear-orden">
+            <i class="fas fa-plus-circle"></i> Crear Orden
+            <% if (productosBajoStock > 0) { %>
+              <i class="fas fa-exclamation-circle icono-alerta"></i>
+            <% } %>
+          </a>
+        <% } else { %>
+          <a href="javascript:void(0);" class="btn-crear-orden disabled" style="pointer-events: none; opacity: 0.5;">
+            <i class="fas fa-plus-circle"></i> Crear Orden
+          </a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+   <table class="tabla-ordenes">     
+  <thead>
+    <tr>
+      <th>ID Orden</th>
+      <th>Proveedor</th>
+        <th>Fecha</th> <!-- Nueva columna -->
+        <th>Hora</th>  <!-- Nueva columna -->
+        <th>Usuario</th>
+      <th>Estado</th>
+      <th>Productos</th>
+      <th>Detalle</th> <!-- Nueva columna -->
+    </tr>
+  </thead>
+  <tbody>
+    <% ordenes.forEach((orden, index) => { %>
+      <tr class="fila-orden" data-index="<%= index %>">
+        <td data-label="ID Orden"><%= orden.id_order %></td>
+        <td data-label="Proveedor"><%= orden.proveedor.razon_social %></td>
+        <% const fechaObjeto = new Date(orden.fecha); %>
+
+        <td data-label="Fecha" data-fecha="<%= fechaObjeto.toISOString() %>">
+          <%= fechaObjeto.toLocaleDateString("es-PE", { timeZone: "America/Lima" }) %>
+        </td>
+
+        <td data-label="Hora">
+          <%= fechaObjeto.toLocaleTimeString("es-PE", {
+            timeZone: "America/Lima",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true
+          }) %>
+        </td>
+                  <td data-label="Usuario"><%= orden.usuario %></td>
+        <td data-label="Estado">
+          <span class="estado-badge"><%= orden.estado %></span>
+        </td>
+
+        <td data-label="Productos">
+          <button class="btn-toggle-productos" data-index="<%= index %>">
+            <span class="btn-text">Ver productos</span>
+            <span class="btn-icon">▼</span>
+          </button>
+        </td>
+        <td data-label="Detalle">
+          <a href="/ordenes/detalle/<%= orden.id_order %>" class="btn-detalle">Ver detalle</a>
+        </td>
+      </tr>
+
+      <!-- Fila desplegable (oculta al inicio) -->
+      <tr class="fila-productos" id="productos-<%= index %>">
+        <td colspan="8"> <!-- Actualizado de 5 a 6 columnas -->
+          <% let productos = []; try {
+            productos = typeof orden.products === 'string'
+              ? JSON.parse(orden.products)
+              : (Array.isArray(orden.products) ? orden.products : []);
+          } catch (e) { productos = []; } %>
+
+          <% if (productos.length > 0) { %>
+            <ul class="lista-productos">
+              <% productos.forEach((p, i) => { %>
+                <li style="--i: <%= i %>">
+                  <span class="nombre-producto"><%= p.nombre %></span>
+                  <span class="cantidad-producto">× <%= p.cantidad %> unidades</span>
+                </li>
+              <% }) %>
+            </ul>
+          <% } else { %>
+            <em>Sin productos</em>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+    <tr id="fila-sin-resultados" style="display: none;">
+  <td colspan="8" style="text-align: center; padding: 20px; color: var(--gray-dark); font-style: italic;">
+    No se encontraron órdenes.
+  </td>
+</tr>
+  </tbody>
+</table>
+
+</div>
+
+<script>
+  // Mostrar/Ocultar productos
+  document.addEventListener("click", (e) => {
+    if (e.target.closest('.btn-toggle-productos')) {
+      const boton = e.target.closest('.btn-toggle-productos');
+      const index = boton.dataset.index;
+      const filaProductos = document.getElementById(`productos-${index}`);
+      const btnText = boton.querySelector('.btn-text');
+      const btnIcon = boton.querySelector('.btn-icon');
+
+      const visible = filaProductos.classList.toggle('show');
+      filaProductos.style.display = visible ? 'table-row' : 'none';
+      btnText.textContent = visible ? 'Ocultar productos' : 'Ver productos';
+      btnIcon.textContent = visible ? '▲' : '▼';
+      btnIcon.style.transform = visible ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+  });
+
+  // Filtros
+  document.addEventListener("DOMContentLoaded", () => {
+    const filtroBusqueda = document.getElementById("filtro-busqueda");
+    const filtroFecha = document.getElementById("filtro-fecha");
+    const filtroDesde = document.getElementById("filtro-desde");
+    const filtroHasta = document.getElementById("filtro-hasta");
+    const filtroEstado = document.getElementById("filtro-estado");
+    const btnLimpiarFiltros = document.getElementById("btn-limpiar-filtros");
+    const hoy = new Date().toISOString().split("T")[0];
+
+    // Limitar fechas futuras
+    filtroDesde.max = hoy;
+    filtroHasta.max = hoy;
+
+    const filas = document.querySelectorAll("table tbody tr.fila-orden");
+
+    const filtrarOrdenes = () => {
+      const termino = filtroBusqueda.value.trim().toLowerCase();
+      const diasFiltro = parseInt(filtroFecha.value);
+      const desde = filtroDesde.value ? new Date(`${filtroDesde.value}T00:00:00`) : null;
+      const hasta = filtroHasta.value ? new Date(`${filtroHasta.value}T23:59:59.999`) : null;
+      const estadoSeleccionado = filtroEstado.value;
+
+      // Validación de rango de fechas
+      if (desde && hasta && desde > hasta) {
+        alert("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.");
+        return;
+      }
+
+      filas.forEach(fila => {
+        const index = fila.dataset.index;
+        const filaProductos = document.getElementById(`productos-${index}`);
+        const idOrden = fila.querySelector("td:nth-child(1)").textContent.trim().toLowerCase();
+        const textoEstado = fila.querySelector("td:nth-child(6)").textContent.trim().toLowerCase();
+        const productosText = filaProductos.textContent.trim().toLowerCase();
+        const fechaIso = fila.querySelector("td:nth-child(3)").dataset.fecha;
+        const fecha = fechaIso ? new Date(fechaIso) : null;
+
+        let mostrar = true;
+
+        if (termino) {
+          if (!isNaN(termino[0])) {
+            if (!idOrden.includes(termino)) mostrar = false;
+          } else {
+            if (!productosText.includes(termino)) mostrar = false;
+          }
+        }
+
+        if (!isNaN(diasFiltro) && fecha) {
+          const hoy = new Date();
+          const diasMs = diasFiltro * 24 * 60 * 60 * 1000;
+          if ((hoy - fecha) > diasMs) mostrar = false;
+        }
+
+        if (desde && fecha < desde) mostrar = false;
+        if (hasta && fecha > hasta) mostrar = false;
+
+        if (estadoSeleccionado && textoEstado !== estadoSeleccionado) mostrar = false;
+
+        fila.style.display = mostrar ? "table-row" : "none";
+        filaProductos.style.display = mostrar && filaProductos.classList.contains("show") ? "table-row" : "none";
+      });
+
+      const algunaVisible = Array.from(filas).some(fila => fila.style.display !== "none");
+      document.getElementById("fila-sin-resultados").style.display = algunaVisible ? "none" : "table-row";
+    };
+
+    // Listeners
+    filtroBusqueda.addEventListener("input", filtrarOrdenes);
+    filtroFecha.addEventListener("change", filtrarOrdenes);
+    filtroDesde.addEventListener("change", filtrarOrdenes);
+    filtroHasta.addEventListener("change", filtrarOrdenes);
+    filtroEstado.addEventListener("change", filtrarOrdenes);
+
+    // Botón limpiar filtros
+    btnLimpiarFiltros.addEventListener("click", () => {
+      filtroBusqueda.value = "";
+      filtroEstado.value = "";
+      filtroFecha.value = "";
+      filtroDesde.value = "";
+      filtroHasta.value = "";
+      filtrarOrdenes();
+    });
+  });
+</script>

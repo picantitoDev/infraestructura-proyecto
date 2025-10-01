@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicon/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <title>Registrar Proveedor</title>
+    <link rel="stylesheet" href="/registrarProveedor.css" />
+    <style>
+      .error-msg {
+        color: red;
+        font-size: 0.9em;
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+    <form action="/proveedores/nuevo" method="POST" class="form-container">
+      <a href="/proveedores" class="btn-back">← Atrás</a>
+      <h1>Registrar Nuevo Proveedor</h1>
+      <div class="form-group">
+        <label for="razon_social">Razón Social *</label>
+        <input
+          type="text"
+          id="razon_social"
+          name="razon_social"
+          required
+          maxlength="255"
+        />
+        <div id="razon-error" class="error-msg"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="ruc">RUC *</label>
+        <input
+          type="number"
+          id="ruc"
+          name="ruc"
+          required
+          maxlength="11"
+          min="10000000000"
+          max="99999999999"
+          title="RUC debe ser un número de 11 dígitos."
+        />
+        <div id="ruc-error" class="error-msg"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="numero_telefono">Número de Teléfono</label>
+        <input
+          type="tel"
+          id="numero_telefono"
+          name="numero_telefono"
+          maxlength="20"
+          pattern="(\+?\d{1,4}[\s-]?)?(\(?\d{1,4}\)?[\s-]?)?\d{7,15}"
+          title="Número de teléfono con un formato válido."
+          required
+        />
+        <div id="telefono-error" class="error-msg"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="correo">Correo Electrónico</label>
+        <input
+          type="email"
+          id="correo"
+          name="correo"
+          maxlength="255"
+          required
+        />
+        <div id="correo-error" class="error-msg"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="direccion">Dirección</label>
+        <input
+          type="text"
+          id="direccion"
+          name="direccion"
+          maxlength="255"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn-submit">Registrar Proveedor</button>
+    </form>
+    </div>
+
+    <script id="proveedores-data" type="application/json">
+      <%- JSON.stringify(proveedores) %>
+    </script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const proveedores = JSON.parse(document.getElementById("proveedores-data").textContent)
+
+  const form = document.querySelector("form")
+  const submitBtn = document.querySelector(".btn-submit")
+
+  const razonInput = document.getElementById("razon_social")
+  const rucInput = document.getElementById("ruc")
+  const telefonoInput = document.getElementById("numero_telefono")
+  const correoInput = document.getElementById("correo")
+
+  const razonError = document.getElementById("razon-error")
+  const rucError = document.getElementById("ruc-error")
+  const telefonoError = document.getElementById("telefono-error")
+  const correoError = document.getElementById("correo-error")
+
+  // Estado de campos tocados
+  const tocados = {
+    razon: false,
+    ruc: false,
+    telefono: false,
+    correo: false,
+  }
+
+  function validarRucPeru(ruc) {
+    return /^[12]0\d{9}$/.test(ruc)
+  }
+
+  function validarTelefonoPeru(numero) {
+    return /^(9\d{8}|01\d{7}|0[2-8]\d{7})$/.test(numero)
+  }
+
+  function validarEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  }
+
+  function validarCampoIndividual(campo) {
+    const razon = razonInput.value.trim().toLowerCase()
+    const ruc = rucInput.value.trim()
+    const telefono = telefonoInput.value.trim()
+    const correo = correoInput.value.trim().toLowerCase()
+
+    // Razón social
+    if (campo === "razon" && tocados.razon) {
+      const existe = proveedores.some(p => p.razon_social.toLowerCase() === razon)
+      razonError.textContent = existe ? "Esta razón social ya está registrada." : ""
+    }
+
+    // RUC
+    if (campo === "ruc" && tocados.ruc) {
+      const existe = proveedores.some(p => p.ruc === ruc)
+      if (!validarRucPeru(ruc)) {
+        rucError.textContent = "RUC inválido. Debe tener 11 dígitos y comenzar con 10 o 20."
+      } else if (existe) {
+        rucError.textContent = "Este RUC ya está registrado."
+      } else {
+        rucError.textContent = ""
+      }
+    }
+
+    // Teléfono
+    if (campo === "telefono" && tocados.telefono) {
+      const existe = proveedores.some(p => p.numero_telefono === telefono)
+      if (!validarTelefonoPeru(telefono)) {
+        telefonoError.textContent = "Número inválido. Use móvil (9...) o fijo (01..., 07...)."
+      } else if (existe) {
+        telefonoError.textContent = "Este número ya está registrado."
+      } else {
+        telefonoError.textContent = ""
+      }
+    }
+
+    // Correo
+    if (campo === "correo" && tocados.correo) {
+      const existe = proveedores.some(p => p.correo.toLowerCase() === correo)
+      if (!validarEmail(correo)) {
+        correoError.textContent = "Ingrese un correo electrónico válido."
+      } else if (existe) {
+        correoError.textContent = "Este correo ya está registrado."
+      } else {
+        correoError.textContent = ""
+      }
+    }
+
+    // Verificar si hay errores visibles para deshabilitar botón
+    const hayErrores =
+      razonError.textContent ||
+      rucError.textContent ||
+      telefonoError.textContent ||
+      correoError.textContent
+
+    submitBtn.disabled = !!hayErrores
+    submitBtn.style.opacity = !!hayErrores ? "0.5" : "1"
+    submitBtn.style.cursor = !!hayErrores ? "not-allowed" : "pointer"
+  }
+
+  // Listeners con marca de tocado
+  razonInput.addEventListener("input", () => {
+    tocados.razon = true
+    validarCampoIndividual("razon")
+  })
+
+  rucInput.addEventListener("input", () => {
+    tocados.ruc = true
+    validarCampoIndividual("ruc")
+  })
+
+  telefonoInput.addEventListener("input", () => {
+    tocados.telefono = true
+    validarCampoIndividual("telefono")
+  })
+
+  correoInput.addEventListener("input", () => {
+    tocados.correo = true
+    validarCampoIndividual("correo")
+  })
+
+  // Validación completa al enviar
+  form.addEventListener("submit", (e) => {
+    // Marcamos todo como tocado antes de validar
+    Object.keys(tocados).forEach(k => tocados[k] = true)
+    validarCampoIndividual("razon")
+    validarCampoIndividual("ruc")
+    validarCampoIndividual("telefono")
+    validarCampoIndividual("correo")
+
+    const hayErrores =
+      razonError.textContent ||
+      rucError.textContent ||
+      telefonoError.textContent ||
+      correoError.textContent
+
+    if (hayErrores) {
+      e.preventDefault()
+      return
+    }
+
+    submitBtn.textContent = "Registrando..."
+    submitBtn.disabled = true
+    submitBtn.style.opacity = "0.6"
+    submitBtn.style.cursor = "not-allowed"
+  })
+})
+</script>
+
+  </body>
+</html>

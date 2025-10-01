@@ -1,0 +1,111 @@
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <h2>Stock Cloud</h2>
+  </div>
+  <nav class="sidebar-menu">
+    <a href="/" class="menu-link"><i class="fas fa-home"></i> <span>Inicio</span></a>
+
+    <% if (user.rol === 'Admin') { %>
+      <a href="/categorias" class="menu-link"><i class="fas fa-tags"></i> <span>Categorías</span></a>
+      <a href="/productos" class="menu-link"><i class="fas fa-box"></i> <span>Productos</span></a>
+    <% } %>
+
+    <a href="/proveedores" class="menu-link"><i class="fas fa-truck"></i> <span>Proveedores</span></a>
+    <a href="/ordenes" class="menu-link"><i class="fas fa-clipboard-list"></i><span>Órdenes</span></a>
+    <a href="/movimientos" class="menu-link"><i class="fas fa-arrows-rotate"></i> <span>Movimientos</span></a>
+    <a href="/incidencias" class="menu-link"><i class="fas fa-exclamation-circle"></i> <span>Incidencias</span></a>
+   <% if (user.rol === 'Admin') { %>
+      <a href="/usuarios" class="menu-link"><i class="fas fa-users"></i> <span>Usuarios</span></a>
+    <% } %>
+  </nav>
+  
+  <div class="logout-section">
+    <a href="/log-out" class="menu-link logout-link"><i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span></a>
+  </div>
+</aside>
+
+<script>
+  // Sidebar functionality script
+document.addEventListener('DOMContentLoaded', function() {
+  // Create the toggle button for the sidebar
+  const sidebar = document.querySelector('.sidebar');
+  
+  // Add toggle button to the sidebar header
+  const toggleBtn = document.createElement('div');
+  toggleBtn.className = 'toggle-btn';
+  toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+  document.querySelector('.sidebar-header').appendChild(toggleBtn);
+  
+  // Add tooltips to menu links
+  const menuLinks = document.querySelectorAll('.menu-link');
+  menuLinks.forEach(link => {
+    // Extract the text content from the span
+    const text = link.querySelector('span').textContent;
+    
+    // Create tooltip element
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip';
+    tooltip.textContent = text;
+    
+    // Append tooltip to the link
+    link.appendChild(tooltip);
+  });
+  
+  // Optional: Add user profile section if needed
+  const profileSection = `
+    <div class="profile-content">
+      <div class="profile">
+        <div class="profile-details">
+          <img src="/img/default-profile.jpg" alt="Profile">
+          <div class="name-role">
+            <div class="name">Usuario</div>
+            <div class="role">Sistema de Inventario</div>
+          </div>
+        </div>
+        <i class="fas fa-sign-out-alt logout-btn"></i>
+      </div>
+    </div>
+  `;
+  
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  document.body.appendChild(overlay);
+  
+  // Add click event to toggle button
+  toggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+  });
+  
+  // Close sidebar when clicking on overlay
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('active');
+  });
+  
+  // Add logout functionality if needed
+  const logoutBtn = document.querySelector('.logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      // Add logout logic here
+      window.location.href = '/logout';
+    });
+  }
+  
+  // Add active class to current page menu link
+  menuLinks.forEach(link => {
+    const currentPath = window.location.pathname;
+    const linkPath = link.getAttribute('href');
+    
+    if (currentPath === linkPath) {
+      link.classList.add('active');
+    }
+  });
+  
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    if (window.innerWidth <= 768) {
+      sidebar.classList.remove('active');
+    }
+  });
+});
+</script>

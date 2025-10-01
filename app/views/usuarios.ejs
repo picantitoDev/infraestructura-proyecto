@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicon/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <title>Usuarios</title>
+    <link rel="stylesheet" href="/listarUsuarios.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="top-bar">
+                <h1 class="title">Lista de Usuarios</h1>
+          <a href="/usuarios/nuevo" class="btn-crear"> + Crear Usuario </a>
+        </div>
+      </div>
+      <div class="table-responsive">
+              <table class="usuarios-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+      <tbody>
+        <% usuarios.forEach(usuario => { %>
+          <tr>
+            <td><%= usuario.id %></td>
+            <td><%= usuario.username %></td>
+            <td><%= usuario.email || '—' %></td>
+            <td><%= usuario.rol %></td>
+            <td>
+              <% 
+                const actual = user;
+                const objetivo = usuario;
+
+                const esSuperadmin = actual.nivel_acceso === 'superadmin';
+                const esAdmin = actual.rol === 'Admin' && actual.nivel_acceso !== 'superadmin';
+
+                const objetivoEsSuperadmin = objetivo.nivel_acceso === 'superadmin';
+                const objetivoEsAdmin = objetivo.rol === 'Admin';
+
+                const puedeEditar = (
+                  esSuperadmin ||
+                  (esAdmin && !objetivoEsAdmin && !objetivoEsSuperadmin)
+                );
+              %>
+      <% if (puedeEditar) { %>
+        <a href="/usuarios/editar/<%= usuario.id %>" title="Editar usuario">
+          <svg class="edit-icon" viewBox="0 0 24 24">
+            <path d="m18 2 4 4-12 12H6v-4L18 2z"/>
+            <path d="m21.378 5.378-3.756-3.756"/>
+          </svg>
+        </a>
+      <% } else { %>
+        <span title="Sin permisos para editar">
+          <svg class="edit-icon-disabled" viewBox="0 0 24 24">
+            <path d="m18 2 4 4-12 12H6v-4L18 2z"/>
+            <path d="m21.378 5.378-3.756-3.756"/>
+          </svg>
+        </span>
+      <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+
+      </table>
+      </div>
+      <h2 class="subtitle">Auditoría de productos</h2>
+      <div style="margin-bottom: 1rem;">
+  <input
+    type="text"
+    id="busquedaProducto"
+    placeholder="Buscar por nombre de producto..."
+    style="padding: 0.5rem; width: 100%; max-width: 300px;"
+  />
+</div>
+
+<div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+  <table class="usuarios-table" id="tablaAuditoria">
+    <thead>
+              <tr>
+                <th>ID Auditoría</th>
+                <th>Usuario</th>
+                <th>ID Producto</th>
+                <th>Nombre Producto</th>  <!-- Nueva columna -->
+                <th>Acción</th>
+                <th>Campos Modificados</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% auditorias.forEach(a => { %>
+                <tr>
+                  <td><%= a.id_auditoria %></td>
+                  <td><%= a.username %></td>
+                  <td><%= a.id_producto %></td>
+                  <td><%= a.nombre_producto %></td>  <!-- Mostrar nombre del producto -->
+                  <td><%= a.accion %></td>
+                  <td>
+                    <ul class="cambios-lista">
+                      <% Object.keys(a.campos_modificados).forEach(campo => { 
+                          const cambio = a.campos_modificados[campo]; %>
+                        <li>
+                          <strong><%= campo %>:</strong>
+                          <%= cambio.antes %> &rarr; <%= cambio.despues %>
+                        </li>
+                      <% }) %>
+                    </ul>
+                  </td>
+                  <td><%= new Date(a.fecha).toLocaleString() %></td>
+                </tr>
+              <% }) %>
+            <% if (auditorias.length === 0) { %>
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 1rem; color: gray;">
+                  No se han encontrado registros de auditoría.
+                </td>
+              </tr>
+            <% } %>
+            </tbody>
+  </table>
+  <p id="sin-coincidencias" style="display: none; color: gray; text-align: center;  padding: 1rem;  margin-top: 1rem;">
+  No se encontraron auditorías para ese producto.
+</p>
+</div>
+    </div>
+  
+<script>
+  const inputBusqueda = document.getElementById("busquedaProducto");
+  const tabla = document.getElementById("tablaAuditoria");
+  const filas = tabla.querySelectorAll("tbody tr");
+  const mensajeNoCoincidencias = document.getElementById("sin-coincidencias");
+
+  inputBusqueda.addEventListener("input", function () {
+    const filtro = this.value.toLowerCase();
+    let coincidencias = 0;
+
+    filas.forEach(fila => {
+      const nombreProducto = fila.children[3].textContent.toLowerCase();
+      const coincide = nombreProducto.includes(filtro);
+      fila.style.display = coincide ? "" : "none";
+      if (coincide) coincidencias++;
+    });
+
+    mensajeNoCoincidencias.style.display = coincidencias === 0 ? "block" : "none";
+  });
+</script>
+    </body>
+  
+</html>
