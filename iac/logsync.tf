@@ -1,13 +1,13 @@
-resource "proxmox_virtual_environment_container" "grafana" {
-  vm_id     = 702
+resource "proxmox_virtual_environment_container" "logsynch" {
+  vm_id     = 703
   node_name = "proxmox"
 
   initialization {
-    hostname = "grafana"
+    hostname = "logsynch"
 
     ip_config {
       ipv4 {
-        address = "10.10.0.3/24"
+        address = "10.10.0.4/24"
         gateway = "10.10.0.2"
       }
     }
