@@ -17,8 +17,10 @@ passport.use(
       }
 
       const match = await bcrypt.compare(password, user.password)
-      //const match = password === user.password
       if (!match) return done(null, false, { message: "Contraseña incorrecta" })
+
+      console.log('🔑 Login attempt:', usernameOrEmail);
+      console.log('Password match:', match);
 
       return done(null, user)
     } catch (err) {
@@ -31,9 +33,13 @@ passport.serializeUser((user, done) => done(null, user.id))
 
 passport.deserializeUser(async (id, done) => {
   try {
+    console.log("🔁 Deserializing user ID:", id)
     const user = await dbUsuarios.buscarUsuarioPorId(id)
+    if (!user) console.log("⚠️ Usuario no encontrado en DB durante deserialización")
+    else console.log("✅ Usuario deserializado:", user.username)
     done(null, user)
   } catch (err) {
+    console.error("❌ Error deserializando usuario:", err)
     done(err)
   }
 })

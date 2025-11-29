@@ -3,7 +3,7 @@ const dbProductos = require("../model/queriesProductos")
 const dbProveedores = require("../model/queriesProveedores")
 const dbIncidencias = require('../model/queriesIncidencias'); 
 const pdfUtil = require("../utils/pdfGenerator")
-const nodemailer = require("nodemailer");
+const { connectRabbitMQ } = require("../utils/rabbitmq");
 const { DateTime } = require('luxon');
 const { getOrSetCache, redisClient } = require("../utils/redis")
 
@@ -73,7 +73,7 @@ async function crearOrdenPost(req, res) {
       ingresado: 0,
     }));
 
-const fechaLimaUTC = DateTime.now().setZone('America/Lima').toUTC().toJSDate();
+    const fechaLimaUTC = DateTime.now().setZone('America/Lima').toUTC().toJSDate();
 
 
     // Crear orden y obtener ID
@@ -85,25 +85,14 @@ const fechaLimaUTC = DateTime.now().setZone('America/Lima').toUTC().toJSDate();
     const orden = await dbOrdenes.obtenerOrdenPorId(idOrden);
 
     // Generar PDF
-    const pdfBuffer = await pdfUtil.generarOrdenPDF(orden);
+    const pdfBytes = await pdfUtil.generarOrdenPDF(orden);
+    const pdfBuffer = Buffer.from(pdfBytes);
 
     // Obtener datos del proveedor (correo)
     const proveedor = await dbProveedores.obtenerProveedorPorId(proveedorId);
-    const correoDestino = proveedor.correo;
 
-    // Configurar transporte (misma config que recuperación)
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'stockcloud.soporte@gmail.com',
-        pass: 'xxx eojo eaxt', // contraseña de aplicación
-      },
-    });
-
-    // Enviar correo con PDF adjunto
-    await transporter.sendMail({
-      from: 'stockcloud.soporte@gmail.com',
-      to: correoDestino,
+     const emailPayload = {
+      to: proveedor.correo,
       subject: `Nueva Orden de Reabastecimiento N.º ${idOrden}`,
       html: `
         <p>Estimado proveedor,</p>
@@ -113,11 +102,17 @@ const fechaLimaUTC = DateTime.now().setZone('America/Lima').toUTC().toJSDate();
       attachments: [
         {
           filename: `orden_${idOrden}.pdf`,
-          content: pdfBuffer,
-          contentType: 'application/pdf',
+          content: pdfBuffer.toString("base64"),
+          encoding: "base64",
+          contentType: "application/pdf",
         },
       ],
-    });
+    };
+
+    const channel = await connectRabbitMQ();
+    await channel.assertQueue("email_notifications", { durable: true });
+    channel.sendToQueue("email_notifications", Buffer.from(JSON.stringify(emailPayload)));
+    console.log(`Email task queued for ${proveedor.correo}`);
 
     await redisClient.del("ordenes:all")
     await redisClient.del("ordenes:ultimos30dias")

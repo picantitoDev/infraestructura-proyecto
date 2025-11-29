@@ -6,6 +6,7 @@
   "scripts": {
     "start": "nodemon app.js",
     "test": "jest",
+    "sonar": "sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.projectKey=infraestructure-as-code",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
@@ -27,6 +28,7 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.15.0",
+    "amqplib": "^0.10.9",
     "bcryptjs": "^3.0.2",
     "connect-flash": "^0.1.1",
     "connect-pg-simple": "^10.0.0",
@@ -54,5 +56,8 @@
     "nodemon": "^3.1.10",
     "prisma": "^6.15.0",
     "supertest": "^7.1.4"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }
