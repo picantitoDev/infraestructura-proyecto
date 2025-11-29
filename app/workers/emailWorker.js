@@ -14,8 +14,8 @@ const nodemailer = require("nodemailer");
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "stockcloud.soporte@gmail.com",
-        pass: "xxx eojo eaxt", // contraseña de aplicación
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
