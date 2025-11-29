@@ -168,10 +168,6 @@ public/uploads/
 *.crt
 *.csr
 
-# Docker
-.dockerignore
-Dockerfile.prod
-
 # Testing
 test-results/
 playwright-report/
