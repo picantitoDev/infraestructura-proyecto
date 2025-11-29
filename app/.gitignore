@@ -191,3 +191,5 @@ config/local.json
 # Backup files
 *.bak
 *.backup
+
+.scannerwork
