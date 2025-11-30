@@ -13,47 +13,35 @@
 
 - name: Descargar imagen desde Harbor
   community.docker.docker_image:
-    name: "{{ image_name }}"
+    name: "{{ app_image }}"
     source: pull
     force_tag: true
-
-- name: Crear directorio base para PostgreSQL (compose y datos)
+    
+- name: Crear directorio para Docker Compose de la App
   ansible.builtin.file:
-    path: "/opt/docker/postgres"
+    path: "{{ docker_compose_dir }}"
     state: directory
-    mode: "0755"
+    mode: '0755'
 
-- name: Crear directorio de datos de PostgreSQL
-  ansible.builtin.file:
-    path: "{{ postgres_data_dir }}"
-    state: directory
-    mode: "0755"
-
-- name: Crear archivo docker-compose.yml para PostgreSQL
+- name: Crear archivo de configuración docker-compose.yml
   ansible.builtin.template:
     src: docker-compose.yml.j2
-    dest: "/opt/docker/postgres/docker-compose.yml"
-    mode: "0644"
+    dest: "{{ docker_compose_dir }}/docker-compose.yml"
+    mode: '0644'
 
-- name: Eliminar contenedor anterior si existe
+- name: Desplegar App y Worker con Docker Compose
   ansible.builtin.shell: |
-    docker rm -f {{ container_name }} || true
+    cd {{ docker_compose_dir }}
+    docker compose up -d
   args:
     executable: /bin/bash
-  ignore_errors: true
-
-- name: Levantar contenedor PostgreSQL con Docker Compose
-  ansible.builtin.shell: |
-    cd /opt/docker/postgres && docker compose up -d
-  args:
-    executable: /bin/bash
-
-- name: Mostrar estado del contenedor PostgreSQL
+    
+- name: Mostrar estado de los contenedores App y Worker
   ansible.builtin.shell: >
-    docker ps --filter "name={{ container_name }}" \
+    docker ps --filter "name={{ app_container_name }}" --filter "name={{ worker_container_name }}" \
     --format 'table {{ "{{.Names}}\t{{.Status}}\t{{.Ports}}" }}'
-  register: container_status
+  register: app_worker_status
   changed_when: false
 
-- ansible.builtin.debug:
-    msg: "{{ container_status.stdout_lines }}"
+- debug:
+    msg: "{{ app_worker_status.stdout_lines }}"
