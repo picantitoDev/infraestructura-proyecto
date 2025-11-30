@@ -1,0 +1,4 @@
+---
+grafana_dir: /root/grafana
+grafana_admin_password: "{{ lookup('env', 'GRAFANA_ADMIN_PASSWORD') }}"
+loki_retention_days: 14
