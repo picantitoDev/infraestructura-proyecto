@@ -1,0 +1,25 @@
+---
+docker_user: "{{ lookup('env', 'DOCKER_USER') }}"
+docker_pat: "{{ lookup('env', 'HARBOR_ADMIN_PASSWORD') }}"
+harbor_registry: "{{ lookup('env', 'HARBOR_REGISTRY') | default('harbor.local') }}"
+
+app_image: "{{ harbor_registry }}/picantito/infraestructure-as-code:app-1.0.0"
+app_container_name: "myapp"
+worker_container_name: "myapp-worker"
+
+# URLs de servicios externos
+database_url: "{{ lookup('env', 'DATABASE_URL') }}"
+redis_url: "{{ lookup('env', 'REDIS_URL') }}"
+rabbitmq_url: "{{ lookup('env', 'RABBITMQ_URL') }}"
+
+email_user: "{{ lookup('env', 'EMAIL_USER') }}"
+email_pass: "{{ lookup('env', 'EMAIL_PASS') }}"
+
+node_env: "{{ lookup('env', 'NODE_ENV') | default('production') }}"
+session_secret: "{{ lookup('env', 'SESSION_SECRET') }}"
+
+# Directorio donde vivirá docker-compose de la API
+docker_compose_dir: "/opt/docker/api"
+
+# NFS
+nfs_client_ip: "10.10.0.3"
