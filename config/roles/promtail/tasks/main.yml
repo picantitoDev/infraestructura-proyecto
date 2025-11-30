@@ -1,0 +1,70 @@
+---
+- name: Crear directorios de montura
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ proxy_mount }}"
+    - "{{ app_mount }}"
+    - "{{ db_mount }}"
+
+- name: Montar NFS del proxy (y persistir)
+  ansible.builtin.mount:
+    src: "{{ proxy_nfs }}"
+    path: "{{ proxy_mount }}"
+    fstype: nfs
+    opts: defaults
+    state: mounted
+
+- name: Montar NFS de la app (y persistir)
+  ansible.builtin.mount:
+    src: "{{ app_nfs }}"
+    path: "{{ app_mount }}"
+    fstype: nfs
+    opts: defaults
+    state: mounted
+
+- name: Montar NFS de la base de datos (y persistir)
+  ansible.builtin.mount:
+    src: "{{ db_nfs }}"
+    path: "{{ db_mount }}"
+    fstype: nfs
+    opts: defaults
+    state: mounted
+
+- name: Crear estructura de Promtail
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ promtail_dir }}"
+    - "{{ promtail_dir }}/positions"
+
+- name: Crear archivo de configuración de Promtail
+  ansible.builtin.template:
+    src: promtail-config.yaml.j2
+    dest: "{{ promtail_dir }}/promtail-config.yaml"
+    mode: "0644"
+
+- name: Crear archivo docker-compose.yml para Promtail
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ promtail_dir }}/docker-compose.yml"
+    mode: "0644"
+
+- name: Desplegar Promtail con Docker Compose
+  ansible.builtin.shell: |
+    cd {{ promtail_dir }}
+    docker compose up -d
+  args:
+    executable: /bin/bash
+
+- name: Verificar contenedor Promtail
+  ansible.builtin.shell: docker ps --filter "name=promtail" --format 'table {{ "{{.Names}}\t{{.Status}}\t{{.Ports}}" }}'
+  register: promtail_status
+  changed_when: false
+
+- ansible.builtin.debug:
+    msg: "{{ promtail_status.stdout_lines }}"
