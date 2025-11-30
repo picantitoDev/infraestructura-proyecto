@@ -1,0 +1,8 @@
+---
+- name: Test Promtail Role
+  hosts: promtail
+  become: true
+  gather_facts: true
+
+  roles:
+    - promtail
