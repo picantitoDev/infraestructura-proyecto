@@ -1,0 +1,8 @@
+---
+- name: Incluir configuración de servidor NFS
+  ansible.builtin.include_tasks: server.yml
+  when: nfs_role == "server"
+
+- name: Incluir configuración de cliente NFS
+  ansible.builtin.include_tasks: client.yml
+  when: nfs_role == "client"
