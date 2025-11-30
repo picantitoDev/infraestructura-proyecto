@@ -1,33 +1,41 @@
-resource "proxmox_virtual_environment_container" "logsynch" {
-  vm_id     = 703
+resource "proxmox_virtual_environment_container" "logs" {
+  provider   = proxmox.rootpam
+  vm_id     = 709
   node_name = "proxmox"
 
   initialization {
-    hostname = "logsynch"
+    hostname = "logs"
 
     ip_config {
       ipv4 {
-        address = "10.10.0.4/24"
-        gateway = "10.10.0.2"
+        address = "10.10.0.3/24"
+        gateway = "10.10.0.254"
       }
     }
 
     user_account {
-      keys = [var.ansible_pub_key]
+      keys     = [file(var.ansible_key)]
+      password = "12345"
     }
   }
-    
+  
   operating_system {
-    type             = "alpine"
-    template_file_id = "local:vztmpl/devuan-5.0-standard_5.0_amd64.tar.gz"
+    type             = "debian"
+    template_file_id = "local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst"
   }
 
-  cpu { cores = 1 }
-  memory { dedicated = 512 }
+  cpu {
+    cores = 1
+  }
 
+  memory {
+    dedicated = 512
+  }
+
+  # eth1 = vlan10
   network_interface {
-    name   = "eth0"
-    bridge = "vmbr0"
+    name    = "eth1"
+    bridge  = "vmbr0"
     vlan_id = 10
   }
 
@@ -35,6 +43,12 @@ resource "proxmox_virtual_environment_container" "logsynch" {
     datastore_id = "local-lvm"
     size         = 8
   }
-  
+
   unprivileged = false
+
+  features {
+    nesting = true
+    keyctl  = true
+    fuse    = true
+  }
 }
