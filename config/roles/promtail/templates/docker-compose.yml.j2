@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  promtail:
+    image: grafana/promtail:3.3.2
+    container_name: promtail
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/config.yaml
+    privileged: true
+    network_mode: host
+    volumes:
+      - {{ promtail_dir }}/promtail-config.yaml:/etc/promtail/config.yaml:ro
+      - {{ promtail_dir }}/positions:/tmp
+      - {{ proxy_mount }}:{{ proxy_mount }}:ro
+      - {{ app_mount }}:{{ app_mount }}:ro
+      - {{ db_mount }}:{{ db_mount }}:ro
