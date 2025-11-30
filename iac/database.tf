@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_container" "database" {
-  provider   = proxmox.rootpam
-  vm_id      = 705
-  node_name  = "proxmox"
+  provider  = proxmox.rootpam
+  vm_id     = 705
+  node_name = "proxmox"
 
   initialization {
     hostname = "database"

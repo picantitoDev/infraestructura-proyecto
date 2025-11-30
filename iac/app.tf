@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_container" "app" {
-  provider   = proxmox.rootpam
-  vm_id      = 704
-  node_name  = "proxmox"
+  provider  = proxmox.rootpam
+  vm_id     = 704
+  node_name = "proxmox"
 
   initialization {
     hostname = "app"

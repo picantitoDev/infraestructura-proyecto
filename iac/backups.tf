@@ -3,7 +3,7 @@ resource "proxmox_virtual_environment_container" "backups" {
   vm_id     = 725
   node_name = "proxmox"
 
-  description = "LXC dedicado a cronjobs de backup (PostgreSQL → disco sólido /mnt/pve/backups)"
+  description  = "LXC dedicado a cronjobs de backup (PostgreSQL → disco sólido /mnt/pve/backups)"
   unprivileged = false
 
   features {
@@ -61,10 +61,10 @@ resource "proxmox_virtual_environment_container" "backups" {
     backup = false
   }
 
- # startup {
+  # startup {
   #  order      = 5
-   # up_delay   = 20
-    #down_delay = 10
+  # up_delay   = 20
+  #down_delay = 10
   #}
 
   start_on_boot = true

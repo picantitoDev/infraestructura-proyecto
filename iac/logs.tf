@@ -1,5 +1,5 @@
 resource "proxmox_virtual_environment_container" "logs" {
-  provider   = proxmox.rootpam
+  provider  = proxmox.rootpam
   vm_id     = 709
   node_name = "proxmox"
 
@@ -18,7 +18,7 @@ resource "proxmox_virtual_environment_container" "logs" {
       password = "12345"
     }
   }
-  
+
   operating_system {
     type             = "debian"
     template_file_id = "local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst"
