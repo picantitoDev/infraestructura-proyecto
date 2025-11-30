@@ -10,7 +10,7 @@ services:
       - GF_LOG_LEVEL=error
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_SECURITY_ALLOW_EMBEDDING=true
-      - GF_SECURITY_ADMIN_PASSWORD="{{ grafana_admin_password }}"
+      - GF_SECURITY_ADMIN_PASSWORD={{ grafana_admin_password }}
     volumes:
       - grafana_data:/var/lib/grafana
       - {{ grafana_dir }}/provisioning:/etc/grafana/provisioning
