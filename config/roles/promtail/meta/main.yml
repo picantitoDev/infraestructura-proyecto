@@ -1,0 +1,10 @@
+---
+dependencies:
+  - role: docker_engine
+  - role: nfs
+    vars:
+      nfs_role: "client"
+      nfs_mounts:
+        - { src: "10.10.0.1:/var/lib/docker/containers", path: "/mnt/proxy-logs/docker" }
+        - { src: "10.20.0.1:/var/lib/docker/containers", path: "/mnt/app-logs/docker" }
+        - { src: "10.30.0.1:/var/lib/docker/containers", path: "/mnt/db-logs/docker" }
