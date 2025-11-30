@@ -1,0 +1,91 @@
+---
+- name: Habilitar el reenvío de IP (en tiempo de ejecución)
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    sysctl_set: yes
+    reload: yes
+
+- name: Asegurar que el reenvío de IP sea persistente
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    sysctl_file: /etc/sysctl.conf
+    reload: yes
+
+- name: Deshabilitar rp_filter para todas las interfaces (en tiempo de ejecución)
+  ansible.posix.sysctl:
+    name: "net.ipv4.conf.{{ item }}.rp_filter"
+    value: '0'
+    state: present
+    sysctl_set: yes
+    reload: yes
+  loop: "{{ interfaces }}"
+
+- name: Asegurar que rp_filter sea persistente
+  ansible.posix.sysctl:
+    name: "net.ipv4.conf.{{ item }}.rp_filter"
+    value: '0'
+    state: present
+    sysctl_file: /etc/sysctl.conf
+    reload: yes
+  loop: "{{ interfaces }}"
+
+- name: Vaciar las reglas existentes de nftables
+  ansible.builtin.command: nft flush ruleset
+  changed_when: true
+  failed_when: false
+
+- name: Desplegar la configuración de nftables
+  ansible.builtin.template:
+    src: nftables.conf.j2
+    dest: /etc/nftables.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload nftables
+
+- name: Cargar las reglas de nftables inmediatamente
+  ansible.builtin.command: nft -f /etc/nftables.conf
+  changed_when: true
+
+- name: Agregar ruta por defecto hacia el NAT Gateway (en tiempo de ejecución)
+  ansible.builtin.command:
+    cmd: "ip route add default via {{ nat_gateway_ip }} dev {{ nat_gateway_interface }}"
+  register: default_route_result
+  failed_when: default_route_result.rc != 0 and 'File exists' not in default_route_result.stderr
+  changed_when: default_route_result.rc == 0
+
+- name: Agregar ruta estática hacia VLAN30 (en tiempo de ejecución)
+  ansible.builtin.command:
+    cmd: "ip route add {{ vlan30_network }} via {{ vlan30_gateway }} dev {{ vlan30_interface }}"
+  register: vlan30_route_result
+  failed_when: vlan30_route_result.rc != 0 and 'File exists' not in vlan30_route_result.stderr
+  changed_when: vlan30_route_result.rc == 0
+
+- name: Asegurar que la ruta estática hacia VLAN30 sea persistente
+  ansible.builtin.blockinfile:
+    path: /etc/network/interfaces
+    block: |
+      # Ruta estática hacia VLAN30 (a través del router-20-30)
+      up ip route add {{ vlan30_network }} via {{ vlan30_gateway }} dev {{ vlan30_interface }}
+    marker: "# {mark} ANSIBLE MANAGED VLAN30 ROUTE"
+    create: yes
+    mode: '0644'
+
+- name: Configurar los servidores DNS en resolv.conf
+  ansible.builtin.copy:
+    dest: /etc/resolv.conf
+    content: |
+      {% for dns in dns_servers %}
+      nameserver {{ dns }}
+      {% endfor %}
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Mostrar mensaje de finalización
+  ansible.builtin.debug:
+    msg: "Configuración del Router 10_20 completada en {{ inventory_hostname }}"

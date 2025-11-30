@@ -1,0 +1,18 @@
+---
+interfaces:
+  - all
+  - default
+  - eth0
+  - eth1
+
+nat_gateway_ip: 10.10.0.100
+nat_gateway_interface: eth0
+
+vlan30_network: 10.30.0.0/24
+vlan30_gateway: 10.20.0.253
+vlan30_interface: eth1
+
+dns_servers:
+  - 1.1.1.1
+  - 9.9.9.9
+  - 208.67.222.222
