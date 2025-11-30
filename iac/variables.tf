@@ -24,5 +24,4 @@ variable "ansible_key" {
 variable "proxmox_host" {
   description = "IP o hostname del servidor Proxmox"
   type        = string
-  default     = "192.168.0.201"
 }
