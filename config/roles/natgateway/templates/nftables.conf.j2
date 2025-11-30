@@ -1,0 +1,59 @@
+table inet filter {
+    chain input {
+        type filter hook input priority filter; policy drop;
+
+        # Loopback
+        iifname "lo" accept
+
+        # Established connections
+        ct state established,related accept
+
+        # SSH from LAN (administration)
+        iifname "{{ external_interface }}" tcp dport 22 ip saddr 192.168.0.0/24 accept
+
+        # SSH from VLANs (ProxyJump hops)
+        tcp dport 22 ip saddr 10.10.0.0/24 accept
+        tcp dport 22 ip saddr 10.20.0.0/24 accept
+        tcp dport 22 ip saddr 10.30.0.0/24 accept
+    }
+
+    chain forward {
+        type filter hook forward priority filter; policy drop;
+
+        # Internal VLAN -> Internet
+        iifname "{{ internal_interface }}" oifname "{{ external_interface }}" ct state established,related,new accept
+
+        # Internet -> Internal VLAN (only response)
+        iifname "{{ external_interface }}" oifname "{{ internal_interface }}" ct state established,related accept
+
+        # Laptop + Jump Host -> VLANs (SSH, Ansible, Terraform)
+        iifname "{{ external_interface }}" ip saddr {
+            192.168.0.250,
+            192.168.0.222
+        } oifname "{{ internal_interface }}" accept
+
+        # VLANs -> Laptop (Harbor access)
+        iifname "{{ internal_interface }}" ip daddr {
+            192.168.0.250,
+            192.168.0.222
+        } accept
+    }
+
+    chain output {
+        type filter hook output priority filter; policy drop;
+
+        oifname "lo" accept
+        ct state established,related,new accept
+    }
+}
+
+table ip nat {
+    chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+
+        {% for subnet in internal_subnets %}
+        # Only NAT traffic going to the internet
+        ip saddr {{ subnet }} oifname "{{ external_interface }}" masquerade
+        {% endfor %}
+    }
+}
