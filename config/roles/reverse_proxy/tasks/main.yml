@@ -1,0 +1,56 @@
+---
+# 1) Crear estructura de carpetas
+- name: Crear directorios del reverse proxy
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ proxy_dir }}"
+    - "{{ nginx_dir }}"
+    - "{{ cert_path }}"
+
+# 2) Colocar certificados desde files/
+- name: Copiar certificados SSL
+  ansible.builtin.copy:
+    src: "certs/{{ item }}"
+    dest: "{{ cert_path }}/{{ item }}"
+    mode: "0600"
+  loop:
+    - fullchain.pem
+    - cert-key.pem
+  notify: restart reverse proxy
+
+# 3) Plantilla de nginx.conf
+- name: Renderizar nginx.conf
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_conf_path }}"
+    mode: "0644"
+  notify: restart reverse proxy
+
+# 4) Plantilla de docker-compose.yml
+- name: Renderizar docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ proxy_dir }}/docker-compose.yml"
+    mode: "0644"
+
+# 5) Despliegue con Docker Compose (idempotente)
+- name: Levantar Nginx reverse proxy
+  ansible.builtin.shell: |
+    docker compose up -d
+  args:
+    chdir: "{{ proxy_dir }}"
+    executable: /bin/bash
+
+# 6) Verificación
+- name: Mostrar estado del contenedor
+  ansible.builtin.shell: >
+    docker ps --filter "name={{ proxy_service_name }}" \
+    --format 'table {{ "{{.Names}}\t{{.Status}}\t{{.Ports}}" }}'
+  register: proxy_status
+  changed_when: false
+
+- ansible.builtin.debug:
+    msg: "{{ proxy_status.stdout_lines }}"
