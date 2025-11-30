@@ -1,0 +1,11 @@
+---
+docker_user: "{{ lookup('env', 'DOCKER_USER') }}"
+docker_pat: "{{ lookup('env', 'HARBOR_ADMIN_PASSWORD') }}"
+harbor_registry: "{{ lookup('env', 'HARBOR_REGISTRY') | default('harbor.local') }}"
+image_name: "{{ harbor_registry }}/picantito/infraestructure-as-code:postgres-1.0.0"
+container_name: "mypostgres"
+
+postgres_user: "{{ lookup('env', 'POSTGRES_USER') }}"
+postgres_password: "{{ lookup('env', 'POSTGRES_PASSWORD') }}"
+postgres_db: "{{ lookup('env', 'POSTGRES_DB') }}"
+postgres_data_dir: "/opt/postgres_data"
