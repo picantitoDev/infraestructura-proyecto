@@ -1,0 +1,17 @@
+---
+# Directorios base del reverse proxy
+proxy_dir: /opt/reverse-proxy
+cert_path: "{{ proxy_dir }}/certs"
+nginx_dir: "{{ proxy_dir }}/nginx"
+nginx_conf_path: "{{ nginx_dir }}/nginx.conf"
+
+# Upstream y server_name (ajusta según tu lab)
+server_name: "bravo.local"
+upstream_url: "http://10.20.0.1:3000"
+
+# IP del cliente NFS (Promtail)
+nfs_client_ip: "10.10.0.3"
+
+# Nombre del servicio/contendedor
+proxy_service_name: "nginx-proxy"
+nginx_image: "nginx:1.25-alpine"
