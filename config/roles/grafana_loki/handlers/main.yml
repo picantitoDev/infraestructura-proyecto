@@ -1,0 +1,18 @@
+---
+# ==============================================================
+# Handlers: acciones reactivas para Grafana y Loki
+# ==============================================================
+
+- name: restart grafana container
+  ansible.builtin.shell: |
+    docker restart grafana
+  args:
+    executable: /bin/bash
+  changed_when: false
+
+- name: restart loki container
+  ansible.builtin.shell: |
+    docker restart loki
+  args:
+    executable: /bin/bash
+  changed_when: false
