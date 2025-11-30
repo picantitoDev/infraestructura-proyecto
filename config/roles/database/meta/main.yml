@@ -1,0 +1,10 @@
+---
+dependencies:
+  - role: docker_engine
+  - role: nfs
+    vars:
+      nfs_role: "server"
+      nfs_exports:
+        - path: "/var/lib/docker/containers"
+          client: "10.10.0.3"
+          options: "rw,sync,no_subtree_check,no_root_squash"
