@@ -1,0 +1,11 @@
+---
+# ==============================================================
+# Handlers: acciones reactivas para Promtail
+# ==============================================================
+
+- name: restart promtail container
+  ansible.builtin.shell: |
+    docker restart promtail
+  args:
+    executable: /bin/bash
+  changed_when: false
