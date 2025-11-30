@@ -1,0 +1,15 @@
+---
+# Imagen y contenedor
+rabbitmq_image: "rabbitmq:3-management"
+rabbitmq_container_name: "rabbitmq_sgi"
+
+# Credenciales
+rabbitmq_user: "{{ lookup('env', 'RABBITMQ_USER') }}"
+rabbitmq_pass: "{{ lookup('env', 'RABBITMQ_PASS') }}"
+
+# Puertos
+rabbitmq_amqp_port: 5672
+rabbitmq_http_port: 15672
+
+# Directorio de despliegue
+rabbitmq_dir: /root/rabbitmq
