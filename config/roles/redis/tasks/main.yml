@@ -8,6 +8,10 @@
 - name: Autenticarse en Harbor
   ansible.builtin.shell: |
     echo "{{ docker_pat }}" | docker login {{ harbor_registry }} -u {{ docker_user }} --password-stdin
+  register: harbor_login
+  retries: 5
+  delay: 4
+  until: harbor_login.rc == 0
   args:
     executable: /bin/bash
 
