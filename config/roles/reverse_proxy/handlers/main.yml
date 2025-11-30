@@ -1,0 +1,8 @@
+---
+# Reinicia el servicio del proxy cuando cambian config/certs/compose
+- name: restart reverse proxy
+  ansible.builtin.shell: |
+    docker restart {{ proxy_service_name }} || true
+  args:
+    executable: /bin/bash
+  changed_when: false
