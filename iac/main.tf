@@ -8,8 +8,25 @@ terraform {
 }
 
 provider "proxmox" {
-  endpoint  = var.proxmox_api_url # URL de la API de Proxmox
-  api_token = var.proxmox_api_token # El token de seguridad
+  endpoint  = var.proxmox_api_url
+  api_token = var.proxmox_api_token
+  insecure  = true
+}
 
-  insecure = true
+provider "proxmox" {
+  alias     = "rootpam"
+  endpoint  = var.proxmox_api_url
+  username  = "root@pam"
+  password  = var.root_password
+  insecure  = true
+}
+
+terraform {
+  backend "remote"{
+    hostname = "app.terraform.io"
+    organization = "infraestructure-as-code"
+    workspaces {
+      name = "iac"
+    }
+  }
 }
