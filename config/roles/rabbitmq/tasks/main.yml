@@ -1,0 +1,30 @@
+---
+- name: Crear directorio de RabbitMQ
+  ansible.builtin.file:
+    path: "{{ rabbitmq_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Crear archivo docker-compose.yml para RabbitMQ
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ rabbitmq_dir }}/docker-compose.yml"
+    mode: "0644"
+  notify: restart rabbitmq
+
+- name: Desplegar RabbitMQ con Docker Compose
+  ansible.builtin.shell: |
+    cd {{ rabbitmq_dir }}
+    docker compose up -d
+  args:
+    executable: /bin/bash
+
+- name: Verificar contenedor RabbitMQ
+  ansible.builtin.shell: >
+    docker ps --filter "name={{ rabbitmq_container_name }}" \
+    --format 'table {{ "{{.Names}}\t{{.Status}}\t{{.Ports}}" }}'
+  register: rabbitmq_status
+  changed_when: false
+
+- ansible.builtin.debug:
+    msg: "{{ rabbitmq_status.stdout_lines }}"
