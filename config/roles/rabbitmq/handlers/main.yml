@@ -1,0 +1,7 @@
+---
+- name: restart rabbitmq
+  ansible.builtin.shell: |
+    cd {{ rabbitmq_dir }} && docker compose restart || true
+  args:
+    executable: /bin/bash
+  changed_when: false
