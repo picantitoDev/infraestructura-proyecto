@@ -1,0 +1,12 @@
+---
+docker_user: "{{ lookup('env', 'DOCKER_USER') }}"
+docker_pat: "{{ lookup('env', 'HARBOR_ADMIN_PASSWORD') }}"
+harbor_registry: "{{ lookup('env', 'HARBOR_REGISTRY') | default('harbor.local') }}"
+
+image_name: "{{ harbor_registry }}/picantito/infraestructure-as-code:redis-1.0.0"
+container_name: "myredis"
+
+redis_password: "{{ lookup('env', 'REDIS_PASSWORD') }}"
+redis_port: 6379
+
+docker_compose_dir: "/opt/docker/redis"
