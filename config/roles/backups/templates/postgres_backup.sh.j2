@@ -1,0 +1,32 @@
+#!/bin/bash
+# ===========================================
+# PostgreSQL backup script
+# LXC: backups ({{ ansible_host }})
+# Database host: {{ db_host }}
+# ===========================================
+
+DATE=$(date +%Y-%m-%d_%H-%M)
+DEST="{{ backup_dir }}"
+LOGFILE="{{ log_file }}"
+KEEP_DAYS={{ keep_days }}
+
+DB_HOST="{{ db_host }}"
+DB_USER="{{ db_user }}"
+DB_NAME="{{ db_name }}"
+DB_PASS="{{ db_pass }}"
+
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Iniciando backup..." >> "$LOGFILE"
+
+FILE="$DEST/backup_${DB_NAME}_${DATE}.dump"
+PGPASSWORD="$DB_PASS" pg_dump -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -F c -f "$FILE"
+STATUS=$?
+
+if [ $STATUS -eq 0 ]; then
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Backup completado correctamente: $FILE" >> "$LOGFILE"
+else
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error al generar backup (exit code $STATUS)" >> "$LOGFILE"
+fi
+
+find "$DEST" -type f -mtime +$KEEP_DAYS -name "backup_*.dump" -exec rm {} \;
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Limpieza completada. Archivos mayores a $KEEP_DAYS días eliminados." >> "$LOGFILE"
+echo "-----------------------------------------------------------" >> "$LOGFILE"
