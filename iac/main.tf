@@ -14,16 +14,16 @@ provider "proxmox" {
 }
 
 provider "proxmox" {
-  alias     = "rootpam"
-  endpoint  = var.proxmox_api_url
-  username  = "root@pam"
-  password  = var.root_password
-  insecure  = true
+  alias    = "rootpam"
+  endpoint = var.proxmox_api_url
+  username = "root@pam"
+  password = var.root_password
+  insecure = true
 }
 
 terraform {
-  backend "remote"{
-    hostname = "app.terraform.io"
+  backend "remote" {
+    hostname     = "app.terraform.io"
     organization = "infraestructure-as-code"
     workspaces {
       name = "iac"

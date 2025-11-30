@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_container" "grafana" {
-  provider   = proxmox.rootpam
-  vm_id      = 708
-  node_name  = "proxmox"
+  provider  = proxmox.rootpam
+  vm_id     = 708
+  node_name = "proxmox"
 
   initialization {
     hostname = "grafana"

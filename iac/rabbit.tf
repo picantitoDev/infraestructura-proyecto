@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_container" "rabbit" {
-  provider   = proxmox.rootpam
-  vm_id      = 710
-  node_name  = "proxmox"
+  provider  = proxmox.rootpam
+  vm_id     = 710
+  node_name = "proxmox"
 
   initialization {
     hostname = "rabbit"

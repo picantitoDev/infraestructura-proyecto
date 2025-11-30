@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_container" "reverse_proxy" {
-  provider   = proxmox.rootpam
-  vm_id      = 701
-  node_name  = "proxmox"
+  provider  = proxmox.rootpam
+  vm_id     = 701
+  node_name = "proxmox"
 
   initialization {
     hostname = "proxy"

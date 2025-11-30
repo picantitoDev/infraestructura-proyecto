@@ -29,7 +29,7 @@ resource "proxmox_virtual_environment_container" "nat_gateway" {
       password = "12345"
     }
   }
-  
+
   operating_system {
     type             = "debian"
     template_file_id = "local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst"

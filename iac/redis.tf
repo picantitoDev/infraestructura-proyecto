@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_container" "redis" {
-  provider   = proxmox.rootpam
-  vm_id      = 707
-  node_name  = "proxmox"
+  provider  = proxmox.rootpam
+  vm_id     = 707
+  node_name = "proxmox"
 
   initialization {
     hostname = "redis"
