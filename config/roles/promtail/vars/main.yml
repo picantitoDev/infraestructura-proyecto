@@ -1,0 +1,13 @@
+---
+promtail_dir: /root/promtail
+loki_url: "http://10.10.0.2:3100/loki/api/v1/push"
+
+# Exports NFS de productores (proxy/app/db)
+proxy_nfs: "10.10.0.1:/var/lib/docker/containers"
+app_nfs:   "10.20.0.1:/var/lib/docker/containers"
+db_nfs:    "10.30.0.1:/var/lib/docker/containers"
+
+# Puntos de montaje locales
+proxy_mount: /mnt/proxy-logs/docker
+app_mount:   /mnt/app-logs/docker
+db_mount:    /mnt/db-logs/docker
