@@ -1,0 +1,25 @@
+table inet filter {
+    chain input {
+        type filter hook input priority 0;
+        policy drop;
+
+        # Allow loopback and established traffic
+        iifname "lo" accept;
+        ct state established,related accept;
+
+        # Allow SSH and ICMP
+        tcp dport 22 accept;
+        ip protocol icmp accept;
+    }
+
+    chain forward {
+        type filter hook forward priority 0;
+        policy accept;
+        # Allows routing between VLAN10 ↔ VLAN20 freely
+    }
+
+    chain output {
+        type filter hook output priority 0;
+        policy accept;
+    }
+}
