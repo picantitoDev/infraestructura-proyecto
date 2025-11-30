@@ -1,0 +1,59 @@
+---
+- name: Agregar Harbor al /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "192.168.0.250 harbor.local"
+    state: present
+
+- name: Autenticarse en Harbor
+  ansible.builtin.shell: |
+    echo "{{ docker_pat }}" | docker login {{ harbor_registry }} -u {{ docker_user }} --password-stdin
+  args:
+    executable: /bin/bash
+
+- name: Descargar imagen desde Harbor
+  community.docker.docker_image:
+    name: "{{ image_name }}"
+    source: pull
+    force_tag: true
+
+- name: Crear directorio base para PostgreSQL (compose y datos)
+  ansible.builtin.file:
+    path: "/opt/docker/postgres"
+    state: directory
+    mode: "0755"
+
+- name: Crear directorio de datos de PostgreSQL
+  ansible.builtin.file:
+    path: "{{ postgres_data_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Crear archivo docker-compose.yml para PostgreSQL
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "/opt/docker/postgres/docker-compose.yml"
+    mode: "0644"
+
+- name: Eliminar contenedor anterior si existe
+  ansible.builtin.shell: |
+    docker rm -f {{ container_name }} || true
+  args:
+    executable: /bin/bash
+  ignore_errors: true
+
+- name: Levantar contenedor PostgreSQL con Docker Compose
+  ansible.builtin.shell: |
+    cd /opt/docker/postgres && docker compose up -d
+  args:
+    executable: /bin/bash
+    
+- name: Mostrar estado del contenedor PostgreSQL
+  ansible.builtin.shell: >
+    docker ps --filter "name={{ container_name }}" \
+    --format 'table {{ "{{.Names}}\t{{.Status}}\t{{.Ports}}" }}'
+  register: container_status
+  changed_when: false
+
+- ansible.builtin.debug:
+    msg: "{{ container_status.stdout_lines }}"
