@@ -1,0 +1,73 @@
+---
+- name: Instalar utilidades base
+  ansible.builtin.apt:
+    name:
+      - curl
+      - ca-certificates
+      - gnupg
+    update_cache: yes
+    state: present
+
+- name: Crear directorio para llaves GPG de PostgreSQL
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Agregar llave GPG del repositorio de PostgreSQL
+  ansible.builtin.shell: |
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
+    gpg --dearmor -o /etc/apt/keyrings/pgdg.gpg
+  args:
+    creates: /etc/apt/keyrings/pgdg.gpg
+
+- name: Agregar repositorio oficial de PostgreSQL 16
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/pgdg.list
+    content: |
+      deb [signed-by=/etc/apt/keyrings/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main
+    mode: "0644"
+
+- name: Instalar cliente PostgreSQL 16
+  ansible.builtin.apt:
+    name: postgresql-client-16
+    state: present
+    update_cache: yes
+
+- name: Crear directorio de backups
+  ansible.builtin.file:
+    path: "{{ backup_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Crear archivo de log si no existe
+  ansible.builtin.file:
+    path: "{{ log_file }}"
+    state: touch
+    mode: "0644"
+
+- name: Renderizar script de backup PostgreSQL
+  ansible.builtin.template:
+    src: postgres_backup.sh.j2
+    dest: "{{ backup_script }}"
+    mode: "0755"
+
+- name: Configurar tarea diaria de backup (2 AM)
+  ansible.builtin.cron:
+    name: "PostgreSQL automatic backup"
+    user: root
+    minute: "0"
+    hour: "2"
+    job: "/usr/local/bin/postgres_backup.sh"
+
+- name: Ejecutar primer backup de prueba
+  ansible.builtin.shell: "{{ backup_script }}"
+  register: backup_result
+  ignore_errors: true
+
+- name: Mostrar resultado del backup inicial
+  ansible.builtin.debug:
+    msg:
+      - "Resultado del primer backup:"
+      - "{{ backup_result.stdout_lines | default(['(sin salida)']) }}"
+      - "Revisar log en {{ log_file }}"
