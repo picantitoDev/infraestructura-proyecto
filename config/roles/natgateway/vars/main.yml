@@ -1,0 +1,21 @@
+---
+internal_subnets:
+  - 10.10.0.0/24
+  - 10.20.0.0/24
+  - 10.30.0.0/24
+
+dns_servers:
+  - 1.1.1.1
+  - 9.9.9.9
+  - 208.67.222.222
+
+static_routes:
+  - dest: 10.20.0.0/24
+    via: 10.10.0.254
+    dev: eth1
+  - dest: 10.30.0.0/24
+    via: 10.10.0.254
+    dev: eth1
+
+external_interface: eth0
+internal_interface: eth1
