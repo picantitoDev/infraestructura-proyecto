@@ -1,0 +1,12 @@
+---
+# Credenciales sensibles
+db_host: "{{ lookup('env', 'DB_HOST') }}"
+db_user: "{{ lookup('env', 'POSTGRES_USER') }}"
+db_pass: "{{ lookup('env', 'POSTGRES_PASSWORD') }}"
+
+# No sensibles
+db_name: "sgi"
+backup_dir: "/mnt/solid/postgres_backups"
+log_file: "/var/log/postgres_backup.log"
+keep_days: 7
+backup_script: "/usr/local/bin/postgres_backup.sh"
