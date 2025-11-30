@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  redis:
+    image: {{ image_name }}
+    container_name: {{ container_name }}
+    environment:
+      REDIS_PASSWORD: {{ redis_password }}
+    network_mode: host
+    restart: unless-stopped
