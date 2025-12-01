@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon app.js",
     "test": "jest",
-    "sonar": "sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.projectKey=infraestructure-as-code",
+    "sonar": "sonar -Dsonar.host.url=http://192.168.0.250:9000 -Dsonar.projectKey=infraestructure-as-code",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
