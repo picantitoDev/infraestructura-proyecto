@@ -6,3 +6,7 @@
   args:
     executable: /bin/bash
   changed_when: false
+
+- name: reload nftables
+  ansible.builtin.command: nft -f /etc/nftables.conf
+  changed_when: true
