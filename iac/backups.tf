@@ -24,7 +24,7 @@ resource "proxmox_virtual_environment_container" "backups" {
 
     user_account {
       keys     = [file(var.ansible_key)]
-      password = "12345"
+      password = var.lxc_password
     }
   }
 
@@ -52,20 +52,12 @@ resource "proxmox_virtual_environment_container" "backups" {
     size         = 8
   }
 
-  # Bind mount al disco sólido montado en el host (/mnt/pve/backups)
   mount_point {
-    volume = "/mnt/pve/backups"
+    volume = "/mnt/solid"
     path   = "/mnt/solid"
     acl    = false
     quota  = false
     backup = false
   }
-
-  # startup {
-  #  order      = 5
-  # up_delay   = 20
-  #down_delay = 10
-  #}
-
   start_on_boot = true
 }
