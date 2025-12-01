@@ -25,9 +25,8 @@ terraform {
   backend "remote" {
     hostname     = "app.terraform.io"
     organization = "infraestructure-as-code"
-
     workspaces {
-      prefix = "iac-"
+      name = "iac"
     }
   }
 }
