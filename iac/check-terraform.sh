@@ -1,19 +1,6 @@
 #!/bin/bash
 
 set -e
-
-echo "Generando plan de Terraform..."
-
-terraform init -upgrade
-
-terraform plan -out=tfplan.binary
-
-
-
-echo " Convertir plan a JSON..."
-
-terraform show -json tfplan.binary > tfplan.json
-
 echo ""
 echo "Validacion de Open Policy Agent (OPA local)"
 
