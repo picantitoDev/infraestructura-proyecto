@@ -25,3 +25,8 @@ variable "proxmox_host" {
   description = "IP o hostname del servidor Proxmox"
   type        = string
 }
+
+variable "lxc_password" {
+  type      = string
+  sensitive = true
+}

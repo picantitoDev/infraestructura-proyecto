@@ -15,7 +15,7 @@ resource "proxmox_virtual_environment_container" "database" {
 
     user_account {
       keys     = [file(var.ansible_key)]
-      password = "12345"
+      password = var.lxc_password
     }
   }
 

@@ -26,7 +26,7 @@ resource "proxmox_virtual_environment_container" "nat_gateway" {
 
     user_account {
       keys     = [file(var.ansible_key)]
-      password = "12345"
+      password = var.lxc_password
     }
   }
 
