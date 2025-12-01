@@ -3,7 +3,7 @@ docker_user: "{{ lookup('env', 'DOCKER_USER') }}"
 docker_pat: "{{ lookup('env', 'HARBOR_ADMIN_PASSWORD') }}"
 harbor_registry: "{{ lookup('env', 'HARBOR_REGISTRY') | default('harbor.local') }}"
 
-app_image: "{{ harbor_registry }}/picantito/infraestructure-as-code:app-1.0.0"
+app_image: "{{ harbor_registry }}/picantito/app:latest"
 app_container_name: "myapp"
 worker_container_name: "myapp-worker"
 
