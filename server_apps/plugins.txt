@@ -1,0 +1,10 @@
+configuration-as-code
+configuration-as-code-support
+git
+workflow-aggregator
+credentials-binding
+credentials
+plain-credentials
+ssh-agent
+docker-workflow
+docker-plugin

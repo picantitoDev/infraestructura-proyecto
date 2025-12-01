@@ -2,25 +2,13 @@ FROM jenkins/jenkins:jdk21
 
 USER root
 
-# Dependencias
-RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    lsb-release
+ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
 
-# Agregar la GPG key
-RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor > /usr/share/keyrings/hashicorp-archive-keyring.gpg
+COPY --chown=jenkins:jenkins plugins.txt /usr/share/jenkins/ref/plugins.txt
+RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
 
-# Agrega el repositorio de hashicorp
-RUN echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-
-# Actualizar los paquetes
-RUN apt-get update
-
-# Instalar Terraform
-RUN apt-get install -y terraform
-
-# Instalar Ansible
-RUN apt-get install -y ansible
+RUN echo 2.0 > /usr/share/jenkins/ref/jenkins.install.UpgradeWizard.state
 
 USER jenkins
+
+EXPOSE 8080 50000

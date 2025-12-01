@@ -1,0 +1,217 @@
+jenkins:
+  systemMessage: "Jenkins initial Config"
+
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: admin
+          password: "<REPLACE_ME_ADMIN_PASSWORD>"
+
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+  
+  nodes:
+    - permanent:
+        name: "iac-agent"
+        numExecutors: 1
+        remoteFS: "/home/jenkins/agent"
+        labelString: "iac"
+        mode: NORMAL
+        launcher:
+          inbound:
+            webSocket: true
+            workDirSettings:
+              disabled: false
+              internalDir: "remoting"
+              workDirPath: "/home/jenkins/agent/work"
+
+  clouds:
+    - docker:
+        name: "docker-dind-cloud"
+        dockerApi:
+          dockerHost:
+            uri: "tcp://jenkins-dind:2375"
+
+        templates:
+          - name: "dind-agent"
+            labelString: "dind"
+            remoteFs: "/home/jenkins/agent"
+            mode: NORMAL
+            pullTimeout: 300
+            pullStrategy: PULL_ALWAYS
+            instanceCapStr: "10"
+            removeVolumes: true
+
+            dockerTemplateBase:
+              image: "picantito/jenkins-agent:latest"
+              environmentsString: |
+                JENKINS_URL=http://jenkins:8080
+                JENKINS_TUNNEL=jenkins:50000
+                DOCKER_HOST=tcp://172.17.0.1:2375
+                DOCKER_TLS_CERTDIR=
+
+            connector:
+              attach:
+                user: "jenkins"
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - string:
+              scope: GLOBAL
+              id: "proxmox-api-token"
+              description: "Token de acceso a la API de Proxmox"
+              secret: "<REPLACE_ME_PROXMOX_API_TOKEN>"
+
+          - string:
+              scope: GLOBAL
+              id: "proxmox-host"
+              description: "Host/IP del servidor Proxmox"
+              secret: "<REPLACE_ME_PROXMOX_HOST>"
+
+          - string:
+              scope: GLOBAL
+              id: "proxmox-api-url"
+              description: "URL base de la API de Proxmox"
+              secret: "<REPLACE_ME_PROXMOX_API_URL>"
+            
+          - string:
+              scope: GLOBAL
+              id: "root-password"
+              description: "User password de Proxmox"
+              secret: "<REPLACE_ME_ROOT_PASSWORD>"
+          
+          - string:
+              scope: GLOBAL
+              id: "ansible-vault-pass"
+              description: "Clave del Ansible Vault"
+              secret: "<REPLACE_ME_ANSIBLE_VAULT_PASS>"
+          
+          - string:
+              scope: GLOBAL
+              id: "terraform-cloud-token"
+              description: "Token de Terraform Cloud"
+              secret: "<REPLACE_ME_TERRAFORM_CLOUD_TOKEN>"
+
+          - string:
+              scope: GLOBAL
+              id: "sonar-token"
+              description: "Token de SonarQube"
+              secret: "<REPLACE_ME_SONAR_TOKEN>"
+          
+          - string:
+              scope: GLOBAL
+              id: "DOCKER_USER"
+              description: "Docker user para Harbor"
+              secret: "<REPLACE_ME_DOCKER_USER>"
+
+          - string:
+              scope: GLOBAL
+              id: "HARBOR_ADMIN_PASSWORD"
+              description: "Password del admin de Harbor"
+              secret: "<REPLACE_ME_HARBOR_ADMIN_PASSWORD>"
+
+          - string:
+              scope: GLOBAL
+              id: "HARBOR_REGISTRY"
+              description: "URL del registro Harbor"
+              secret: "<REPLACE_ME_HARBOR_REGISTRY>"
+
+          - string:
+              scope: GLOBAL
+              id: "POSTGRES_USER"
+              description: "Usuario de PostgreSQL"
+              secret: "<REPLACE_ME_POSTGRES_USER>"
+
+          - string:
+              scope: GLOBAL
+              id: "POSTGRES_PASSWORD"
+              description: "Password de PostgreSQL"
+              secret: "<REPLACE_ME_POSTGRES_PASSWORD>"
+
+          - string:
+              scope: GLOBAL
+              id: "POSTGRES_DB"
+              description: "Base de datos PostgreSQL"
+              secret: "<REPLACE_ME_POSTGRES_DB>"
+
+          - string:
+              scope: GLOBAL
+              id: "REDIS_PASSWORD"
+              description: "Password de Redis"
+              secret: "<REPLACE_ME_REDIS_PASSWORD>"
+
+          - string:
+              scope: GLOBAL
+              id: "RABBITMQ_USER"
+              description: "Usuario de RabbitMQ"
+              secret: "<REPLACE_ME_RABBITMQ_USER>"
+
+          - string:
+              scope: GLOBAL
+              id: "RABBITMQ_PASS"
+              description: "Password de RabbitMQ"
+              secret: "<REPLACE_ME_RABBITMQ_PASS>"
+
+          - string:
+              scope: GLOBAL
+              id: "DATABASE_URL"
+              description: "URL de conexión a PostgreSQL"
+              secret: "<REPLACE_ME_DATABASE_URL>"
+
+          - string:
+              scope: GLOBAL
+              id: "REDIS_URL"
+              description: "URL de conexión Redis"
+              secret: "<REPLACE_ME_REDIS_URL>"
+
+          - string:
+              scope: GLOBAL
+              id: "RABBITMQ_URL"
+              description: "URL de conexión RabbitMQ"
+              secret: "<REPLACE_ME_RABBITMQ_URL>"
+
+          - string:
+              scope: GLOBAL
+              id: "EMAIL_USER"
+              description: "Usuario del correo SMTP"
+              secret: "<REPLACE_ME_EMAIL_USER>"
+
+          - string:
+              scope: GLOBAL
+              id: "EMAIL_PASS"
+              description: "Password del correo SMTP"
+              secret: "<REPLACE_ME_EMAIL_PASS>"
+
+          - string:
+              scope: GLOBAL
+              id: "NODE_ENV"
+              description: "Node.js environment"
+              secret: "<REPLACE_ME_NODE_ENV>"
+
+          - string:
+              scope: GLOBAL
+              id: "SESSION_SECRET"
+              description: "Session secret para la API"
+              secret: "<REPLACE_ME_SESSION_SECRET>"
+
+          - string:
+              scope: GLOBAL
+              id: "GRAFANA_ADMIN_PASSWORD"
+              description: "Password del admin de Grafana"
+              secret: "<REPLACE_ME_GRAFANA_ADMIN_PASSWORD>"
+
+          - string:
+              scope: GLOBAL
+              id: "DB_HOST"
+              description: "Host de PostgreSQL"
+              secret: "<REPLACE_ME_DB_HOST>"
+          
+          - string:
+              scope: GLOBAL
+              id: "lxc-password"
+              description: "Password para los contenedores LXC"
+              secret: "<REPLACE_ME_LXC_PASSWORD>"

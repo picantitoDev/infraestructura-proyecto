@@ -1,0 +1,36 @@
+FROM jenkins/inbound-agent:jdk21
+
+USER root
+
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    gnupg \
+    lsb-release \
+    openssh-client \
+    sshpass \
+    iputils-ping \
+    ansible \
+    python3 \
+    python3-pip \
+    vim \
+    jq \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor > /usr/share/keyrings/hashicorp-archive-keyring.gpg \
+ && echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" > /etc/apt/sources.list.d/hashicorp.list \
+ && apt-get update \
+ && apt-get install -y terraform \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /home/jenkins/.ssh /home/jenkins/terraform_state \
+    && chmod 700 /home/jenkins/.ssh \
+    && chmod 755 /home/jenkins/terraform_state \
+    && chown -R jenkins:jenkins /home/jenkins/.ssh /home/jenkins/terraform_state
+
+RUN curl -L -o /usr/local/bin/opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static \
+    && chmod 755 /usr/local/bin/opa
+
+USER jenkins
+
+RUN terraform -version && ansible --version && ssh -V
