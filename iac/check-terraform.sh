@@ -1,10 +1,6 @@
 #!/bin/bash
 
 set -e
-
-echo "Convertir plan a JSON..."
-terraform show -json tfplan.binary > tfplan.json
-
 echo ""
 echo "Validacion de Open Policy Agent"
 
