@@ -1,6 +1,10 @@
 {
   "name": "agile-dev",
   "version": "1.0.0",
+  "author": {
+    "name": "Piero Arturo Alcántara Rodríguez",
+    "email": "piero@example.com"
+  },
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -24,7 +28,6 @@
     "html"
   ],
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.15.0",
