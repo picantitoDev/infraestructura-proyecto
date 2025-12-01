@@ -1,5 +1,5 @@
 resource "proxmox_virtual_environment_container" "nat_gateway" {
-  vm_id     = 704
+  vm_id     = 706
   node_name = "proxmox"
 
   initialization {
@@ -14,7 +14,7 @@ resource "proxmox_virtual_environment_container" "nat_gateway" {
 
     ip_config {
       ipv4 {
-        address = "10.10.0.2/24"
+        address = "10.10.0.100/24"
       }
     }
 
@@ -25,13 +25,14 @@ resource "proxmox_virtual_environment_container" "nat_gateway" {
     }
 
     user_account {
-      keys = [var.ansible_pub_key]
+      keys     = [file(var.ansible_key)]
+      password = var.lxc_password
     }
   }
-  
+
   operating_system {
-    type             = "alpine"
-    template_file_id = "local:vztmpl/devuan-5.0-standard_5.0_amd64.tar.gz"
+    type             = "debian"
+    template_file_id = "local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst"
   }
 
   cpu {

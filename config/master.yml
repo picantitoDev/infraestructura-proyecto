@@ -1,0 +1,36 @@
+---
+- name: 01 - Bootstrap del sistema
+  import_playbook: playbooks/01_bootstrap.yml
+
+- name: 02 - Configuración del NAT Gateway
+  import_playbook: playbooks/02_natgateway.yml
+
+- name: 03 - Router VLAN 10 => 20
+  import_playbook: playbooks/03_router_10_20.yml
+
+- name: 04 - Router VLAN 20 => 30
+  import_playbook: playbooks/04_router_20_30.yml
+
+- name: 05 - Base de datos PostgreSQL
+  import_playbook: playbooks/05_database.yml
+
+- name: 06 - Redis
+  import_playbook: playbooks/06_redis.yml
+
+- name: 07 - RabbitMQ
+  import_playbook: playbooks/07_rabbitmq.yml
+
+- name: 08 - API / Aplicación
+  import_playbook: playbooks/08_api.yml
+
+- name: 09 - Reverse Proxy (Nginx)
+  import_playbook: playbooks/09_reverse_proxy.yml
+
+- name: 10 - Grafana + Loki
+  import_playbook: playbooks/10_grafana_loki.yml
+
+- name: 11 - Promtail
+  import_playbook: playbooks/11_promtail.yml
+
+- name: 12 - Backups (PostgreSQL => SSD)
+  import_playbook: playbooks/12_backups.yml

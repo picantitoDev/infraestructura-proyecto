@@ -1,0 +1,54 @@
+- name: Prueba de conectividad inicial y optimización de DNS
+  hosts: all
+  gather_facts: false
+  become: true
+
+  tasks:
+
+    - name: Probar conexión SSH
+      shell: echo "Conectado a $(hostname)"
+
+    - name: Mostrar direcciones IP
+      shell: ip -4 addr show | grep 'inet '
+      register: ip_info
+      ignore_errors: true
+
+    - debug:
+        var: ip_info.stdout
+
+    - name: Deshabilitar UseDNS en sshd_config
+      shell: |
+        if grep -q "^#UseDNS" /etc/ssh/sshd_config; then
+          sed -i 's/^#UseDNS.*/UseDNS no/' /etc/ssh/sshd_config
+        elif grep -q "^UseDNS" /etc/ssh/sshd_config; then
+          sed -i 's/^UseDNS.*/UseDNS no/' /etc/ssh/sshd_config
+        else
+          echo "UseDNS no" >> /etc/ssh/sshd_config
+        fi
+        systemctl restart ssh || systemctl restart sshd
+      register: ssh_dns_fix
+      changed_when: "'UseDNS no' in ssh_dns_fix.stdout or 'UseDNS no' in ssh_dns_fix.stderr"
+
+    - name: Deshabilitar GSSAPIAuthentication en SSH
+      shell: |
+        if grep -q "^#GSSAPIAuthentication" /etc/ssh/sshd_config; then
+          sed -i 's/^#GSSAPIAuthentication.*/GSSAPIAuthentication no/' /etc/ssh/sshd_config
+        elif grep -q "^GSSAPIAuthentication" /etc/ssh/sshd_config; then
+          sed -i 's/^GSSAPIAuthentication.*/GSSAPIAuthentication no/' /etc/ssh/sshd_config
+        else
+          echo "GSSAPIAuthentication no" >> /etc/ssh/sshd_config
+        fi
+        systemctl restart ssh || systemctl restart sshd
+      register: ssh_gssapi_fix
+      changed_when: "'GSSAPIAuthentication no' in ssh_gssapi_fix.stdout or 'GSSAPIAuthentication no' in ssh_gssapi_fix.stderr"
+
+    - name: Añadir DNS de respaldo (Google y Cloudflare)
+      shell: |
+        if ! grep -q "8.8.8.8" /etc/resolv.conf; then
+          echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+          echo "nameserver 1.1.1.1" >> /etc/resolv.conf
+        fi
+
+    - name: Mostrar mensaje final
+      debug:
+        msg: "SSH y DNS optimizados correctamente en {{ inventory_hostname }}"

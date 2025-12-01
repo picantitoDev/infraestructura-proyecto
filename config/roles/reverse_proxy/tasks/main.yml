@@ -1,0 +1,75 @@
+---
+# Firewall
+- name: Vaciar reglas existentes de nftables
+  ansible.builtin.command: nft flush ruleset
+  changed_when: true
+
+- name: Desplegar configuración nftables
+  ansible.builtin.template:
+    src: nftables.conf.j2
+    dest: /etc/nftables.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload nftables
+
+- name: Cargar reglas nftables inmediatamente
+  ansible.builtin.command: nft -f /etc/nftables.conf
+  changed_when: true
+
+- name: Habilitar servicio nftables
+  ansible.builtin.systemd:
+    name: nftables
+    enabled: true
+    state: started
+
+# NGINX
+- name: Crear directorios del reverse proxy
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ proxy_dir }}"
+    - "{{ nginx_dir }}"
+    - "{{ cert_path }}"
+
+- name: Copiar certificados SSL
+  ansible.builtin.copy:
+    src: "certs/{{ item }}"
+    dest: "{{ cert_path }}/{{ item }}"
+    mode: "0600"
+  loop:
+    - fullchain.pem
+    - cert-key.pem
+  notify: restart reverse proxy
+
+- name: Renderizar nginx.conf
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_conf_path }}"
+    mode: "0644"
+  notify: restart reverse proxy
+
+- name: Renderizar docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ proxy_dir }}/docker-compose.yml"
+    mode: "0644"
+
+- name: Levantar Nginx reverse proxy
+  ansible.builtin.shell: |
+    docker compose up -d
+  args:
+    chdir: "{{ proxy_dir }}"
+    executable: /bin/bash
+
+- name: Mostrar estado del contenedor
+  ansible.builtin.shell: >
+    docker ps --filter "name={{ proxy_service_name }}" \
+    --format 'table {{ "{{.Names}}\t{{.Status}}\t{{.Ports}}" }}'
+  register: proxy_status
+  changed_when: false
+
+- ansible.builtin.debug:
+    msg: "{{ proxy_status.stdout_lines }}"

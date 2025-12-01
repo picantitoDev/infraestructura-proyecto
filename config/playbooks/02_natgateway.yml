@@ -1,0 +1,8 @@
+---
+- name: Test NAT Gateway Role
+  hosts: natgateway
+  become: true
+  gather_facts: true
+
+  roles:
+    - natgateway

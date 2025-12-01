@@ -1,0 +1,50 @@
+---
+- name: Agregar Harbor al /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "192.168.0.250 harbor.local"
+    state: present
+
+- name: Autenticarse en Harbor
+  ansible.builtin.shell: |
+    echo "{{ docker_pat }}" | docker login {{ harbor_registry }} -u {{ docker_user }} --password-stdin
+  register: harbor_login
+  retries: 5
+  delay: 4
+  until: harbor_login.rc == 0
+  args:
+    executable: /bin/bash
+
+- name: Descargar imagen desde Harbor
+  community.docker.docker_image:
+    name: "{{ image_name }}"
+    source: pull
+    force_tag: true
+
+- name: Crear directorio de despliegue de Redis
+  ansible.builtin.file:
+    path: "{{ docker_compose_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Generar archivo docker-compose.yml para Redis
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ docker_compose_dir }}/docker-compose.yml"
+    mode: "0644"
+
+- name: Levantar contenedor Redis con Docker Compose
+  ansible.builtin.shell: |
+    cd {{ docker_compose_dir }} && docker compose up -d
+  args:
+    executable: /bin/bash
+
+- name: Mostrar estado del contenedor Redis
+  ansible.builtin.shell: >
+    docker ps --filter "name={{ container_name }}" \
+    --format 'table {{ "{{.Names}}\t{{.Status}}\t{{.Ports}}" }}'
+  register: redis_status
+  changed_when: false
+
+- ansible.builtin.debug:
+    msg: "{{ redis_status.stdout_lines }}"

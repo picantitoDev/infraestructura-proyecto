@@ -1,0 +1,11 @@
+---
+# Este rol depende de docker_engine y expone logs vía NFS (server) para Promtail
+dependencies:
+  - role: docker_engine
+  - role: nfs
+    vars:
+      nfs_role: "server"
+      nfs_exports:
+        - path: "/var/lib/docker/containers"
+          client: "{{ nfs_client_ip }}"
+          options: "rw,sync,no_subtree_check,no_root_squash"

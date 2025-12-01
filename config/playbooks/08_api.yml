@@ -1,0 +1,8 @@
+---
+- name: Test API Role
+  hosts: app
+  become: true
+  gather_facts: true
+
+  roles:
+    - api

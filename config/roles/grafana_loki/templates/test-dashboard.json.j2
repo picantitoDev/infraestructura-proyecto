@@ -1,0 +1,100 @@
+{
+  "id": null,
+  "uid": "dashboard-final",
+  "title": "Dashboard de Logs",
+  "schemaVersion": 42,
+  "version": 1,
+  "editable": true,
+
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+
+  "timezone": "browser",
+
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "loki",
+        "refresh": 1,
+        "hide": 2
+      }
+    ]
+  },
+
+  "panels": [
+
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Requests GET en la Última Hora",
+      "datasource": {
+        "type": "loki",
+        "uid": "$datasource"
+      },
+      "gridPos": { "h": 9, "w": 7, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "{% raw %}count_over_time({job=\"proxy_docker\"} |= \"GET /\" |= \" 200 \" [1h]){% endraw %}",
+          "refId": "A",
+          "queryType": "range"
+        }
+      ]
+    },
+
+    {
+      "id": 2,
+      "type": "logs",
+      "title": "Logs de Base de Datos",
+      "datasource": {
+        "type": "loki",
+        "uid": "$datasource"
+      },
+      "gridPos": { "h": 11, "w": 24, "x": 0, "y": 9 },
+      "targets": [
+        {
+          "expr": "{% raw %}{job=\"db_docker\"} | json | line_format \"{{.log}}\"{% endraw %}",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "id": 3,
+      "type": "logs",
+      "title": "Logs de Aplicación",
+      "datasource": {
+        "type": "loki",
+        "uid": "$datasource"
+      },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 20 },
+      "targets": [
+        {
+          "expr": "{% raw %}{job=\"app_docker\"} | json | line_format \"{{.time}} | {{.stream}} | {{.log}}\"{% endraw %}",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "id": 4,
+      "type": "logs",
+      "title": "Logs de Reverse Proxy (NGINX)",
+      "datasource": {
+        "type": "loki",
+        "uid": "$datasource"
+      },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 32 },
+      "targets": [
+        {
+          "expr": "{% raw %}{job=\"proxy_docker\"} | json | pattern \"<date> <time> [<level>] <worker>: <msg>\" | line_format \"{{if .date}}{{.date}} {{.time}} | {{.level}} | Worker:{{.worker}} | {{.msg}}{{else}}{{.log}}{{end}}\"{% endraw %}",
+          "refId": "A"
+        }
+      ]
+    }
+
+  ]
+}

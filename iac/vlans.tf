@@ -1,7 +1,7 @@
 # VLAN 10 - Presentación
 resource "proxmox_virtual_environment_network_linux_vlan" "vlan10" {
-  node_name = "proxmox"       
-  name      = "vmbr0.10"      
+  node_name = "proxmox"
+  name      = "vmbr0.10"
   comment   = "VLAN 10 - Capa de Presentación"
   autostart = true
 }

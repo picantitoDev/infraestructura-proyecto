@@ -1,0 +1,31 @@
+---
+- name: Instalar NFS server
+  ansible.builtin.apt:
+    name: nfs-kernel-server
+    state: present
+    update_cache: yes
+
+- name: Asegurar permisos correctos en /var/lib/docker
+  ansible.builtin.file:
+    path: /var/lib/docker
+    mode: "0755"
+    recurse: no
+
+- name: Permitir lectura a contenedores
+  ansible.builtin.file:
+    path: /var/lib/docker/containers
+    mode: "o+rx"
+    recurse: yes
+
+- name: Configurar exportaciones NFS
+  ansible.builtin.template:
+    src: exports.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart nfs
+
+- name: Exportar recursos NFS
+  ansible.builtin.command: exportfs -rav
+  changed_when: false

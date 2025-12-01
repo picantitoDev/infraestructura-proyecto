@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  app:
+    image: "{{ app_image }}"
+    container_name: "{{ app_container_name }}"
+    environment:
+      DATABASE_URL: "{{ database_url }}"
+      REDIS_URL: "{{ redis_url }}"
+      RABBITMQ_URL: "{{ rabbitmq_url }}"
+      NODE_ENV: "{{ node_env }}"
+      SESSION_SECRET: "{{ session_secret }}"
+    network_mode: host
+    restart: unless-stopped
+
+  worker:
+    image: "{{ app_image }}"
+    container_name: "{{ worker_container_name }}"
+    entrypoint: "node"
+    command: "workers/emailWorker.js"
+    environment:
+      RABBITMQ_URL: "{{ rabbitmq_url }}"
+      NODE_ENV: "{{ node_env }}"
+      EMAIL_USER: "{{ email_user }}"
+      EMAIL_PASS: "{{ email_pass }}"
+    network_mode: host
+    restart: unless-stopped

@@ -1,0 +1,8 @@
+---
+- name: Test RabbitMQ Role
+  hosts: rabbit
+  become: true
+  gather_facts: true
+
+  roles:
+    - rabbitmq

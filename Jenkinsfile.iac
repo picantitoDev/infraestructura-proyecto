@@ -1,0 +1,329 @@
+pipeline {
+    agent none
+
+    environment {
+        SSH_AGENT_PID = ''
+        SSH_AUTH_SOCK = ''
+
+        DOCKER_USER            = credentials('DOCKER_USER')
+        HARBOR_ADMIN_PASSWORD  = credentials('HARBOR_ADMIN_PASSWORD')
+        HARBOR_REGISTRY        = credentials('HARBOR_REGISTRY')
+
+        POSTGRES_USER          = credentials('POSTGRES_USER')
+        POSTGRES_PASSWORD      = credentials('POSTGRES_PASSWORD')
+        POSTGRES_DB            = credentials('POSTGRES_DB')
+        DB_HOST                = credentials('DB_HOST')
+        DATABASE_URL           = credentials('DATABASE_URL')
+
+        REDIS_PASSWORD         = credentials('REDIS_PASSWORD')
+        REDIS_URL              = credentials('REDIS_URL')
+
+        RABBITMQ_USER          = credentials('RABBITMQ_USER')
+        RABBITMQ_PASS          = credentials('RABBITMQ_PASS')
+        RABBITMQ_URL           = credentials('RABBITMQ_URL')
+
+        EMAIL_USER             = credentials('EMAIL_USER')
+        EMAIL_PASS             = credentials('EMAIL_PASS')
+
+        NODE_ENV               = credentials('NODE_ENV')
+        SESSION_SECRET         = credentials('SESSION_SECRET')
+
+        GRAFANA_ADMIN_PASSWORD = credentials('GRAFANA_ADMIN_PASSWORD')
+    }
+
+    stages {
+        stage('Despliegue de Infraestructura') {
+            agent { label 'iac' }
+
+            environment {
+                TF_CLI_CONFIG_FILE = "${WORKSPACE}/iac/terraform.tfrc"
+            }
+
+            stages {
+
+                stage('Checkout') {
+                    steps {
+                        script {
+                            checkout scm
+                        }
+                    }
+                }
+
+                stage('Terraform Init') {
+                    steps {
+                        dir('iac') {
+                            withCredentials([
+                                string(credentialsId: 'terraform-cloud-token', variable: 'TF_TOKEN')
+                            ]) {
+                                sh '''
+                                    echo 'Configurando credenciales de Terraform Cloud...'
+                                    cat > terraform.tfrc <<EOF
+credentials "app.terraform.io" {
+  token = "${TF_TOKEN}"
+}
+EOF
+
+                                    echo 'Ejecutando terraform init...'
+                                    terraform init
+                                '''
+                            }
+                        }
+                    }
+                }
+
+                stage('Terraform Plan') {
+                    steps {
+                        dir('iac') {
+                            withCredentials([
+                                string(credentialsId: 'proxmox-api-url',   variable: 'PM_URL'),
+                                string(credentialsId: 'proxmox-api-token', variable: 'PM_TOKEN'),
+                                string(credentialsId: 'root-password',     variable: 'PM_PASS'),
+                                string(credentialsId: 'proxmox-host',      variable: 'PM_HOST'),
+                                string(credentialsId: 'lxc-password',      variable: 'LXC_PASS')
+                            ]) {
+                                sh '''
+                                    echo 'Ejecutando terraform plan...'
+                                    terraform plan \
+                                        -var="proxmox_api_url=${PM_URL}" \
+                                        -var="proxmox_api_token=${PM_TOKEN}" \
+                                        -var="root_password=${PM_PASS}" \
+                                        -var="proxmox_host=${PM_HOST}" \
+                                        -var="lxc_password=${LXC_PASS}" \
+                                        -out=tfplan
+                                '''
+                            }
+                        }
+                    }
+                }
+
+                stage('Validación de Políticas OPA') {
+                    steps {
+                        dir('iac') {
+                            sh '''
+                                echo "Convirtiendo tfplan a JSON..."
+                                terraform show -json tfplan > tfplan.json
+                
+                                echo "Ejecutando validación OPA..."
+                                chmod +x check-terraform.sh
+                                ./check-terraform.sh
+                            '''
+                        }
+                    }
+                }
+
+                stage('Terraform Apply') {
+                    steps {
+                        dir('iac') {
+                            withCredentials([
+                                string(credentialsId: 'proxmox-api-url',   variable: 'PM_URL'),
+                                string(credentialsId: 'proxmox-api-token', variable: 'PM_TOKEN'),
+                                string(credentialsId: 'root-password',     variable: 'PM_PASS')
+                            ]) {
+                                sh '''
+                                    echo 'Ejecutando terraform apply...'
+                                    terraform apply -parallelism=1 -auto-approve tfplan
+                                '''
+                            }
+                        }
+                    }
+                }
+
+                stage('Configurar SSH Agent') {
+                    steps {
+                        withCredentials([
+                            string(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS')
+                        ]) {
+                            sh '''
+                                echo "$VAULT_PASS" > vault_pass.txt
+                                chmod 600 vault_pass.txt
+
+                                chmod 600 /home/jenkins/.ssh/ansible
+                                eval $(ssh-agent -s)
+                                ssh-add /home/jenkins/.ssh/ansible
+
+                                echo $SSH_AGENT_PID > /tmp/ssh_agent_pid_${BUILD_NUMBER}
+                                echo $SSH_AUTH_SOCK > /tmp/ssh_auth_sock_${BUILD_NUMBER}
+                            '''
+                        }
+                    }
+                }
+
+                stage('Bootstrap') {
+                    steps {
+                        sh '''
+                            export SSH_AGENT_PID=$(cat /tmp/ssh_agent_pid_${BUILD_NUMBER})
+                            export SSH_AUTH_SOCK=$(cat /tmp/ssh_auth_sock_${BUILD_NUMBER})
+
+                            cd config
+                            ansible-playbook -i inventory/production/hosts.ini -u root playbooks/01_bootstrap.yml || exit 1
+                        '''
+                    }
+                }
+
+                stage('NAT Gateway') {
+                    steps {
+                        sh '''
+                            export SSH_AGENT_PID=$(cat /tmp/ssh_agent_pid_${BUILD_NUMBER})
+                            export SSH_AUTH_SOCK=$(cat /tmp/ssh_auth_sock_${BUILD_NUMBER})
+
+                            cd config
+                            ansible-playbook -i inventory/production/hosts.ini -u root playbooks/02_natgateway.yml || exit 1
+                        '''
+                    }
+                }
+
+                stage('Router 10-20') {
+                    steps {
+                        sh '''
+                            export SSH_AGENT_PID=$(cat /tmp/ssh_agent_pid_${BUILD_NUMBER})
+                            export SSH_AUTH_SOCK=$(cat /tmp/ssh_auth_sock_${BUILD_NUMBER})
+
+                            cd config
+                            ansible-playbook -i inventory/production/hosts.ini -u root playbooks/03_router_10_20.yml || exit 1
+                        '''
+                    }
+                }
+
+                stage('Router 20-30') {
+                    steps {
+                        sh '''
+                            export SSH_AGENT_PID=$(cat /tmp/ssh_agent_pid_${BUILD_NUMBER})
+                            export SSH_AUTH_SOCK=$(cat /tmp/ssh_auth_sock_${BUILD_NUMBER})
+
+                            cd config
+                            ansible-playbook -i inventory/production/hosts.ini -u root playbooks/04_router_20_30.yml || exit 1
+                        '''
+                    }
+                }
+
+                stage('Base de Datos') {
+                    steps {
+                        sh '''
+                            export SSH_AGENT_PID=$(cat /tmp/ssh_agent_pid_${BUILD_NUMBER})
+                            export SSH_AUTH_SOCK=$(cat /tmp/ssh_auth_sock_${BUILD_NUMBER})
+
+                            cd config
+                            ansible-playbook -i inventory/production/hosts.ini -u root playbooks/05_database.yml || exit 1
+                        '''
+                    }
+                }
+
+                stage('Redis') {
+                    steps {
+                        sh '''
+                            export SSH_AGENT_PID=$(cat /tmp/ssh_agent_pid_${BUILD_NUMBER})
+                            export SSH_AUTH_SOCK=$(cat /tmp/ssh_auth_sock_${BUILD_NUMBER})
+
+                            cd config
+                            ansible-playbook -i inventory/production/hosts.ini -u root playbooks/06_redis.yml || exit 1
+                        '''
+                    }
+                }
+
+                stage('RabbitMQ') {
+                    steps {
+                        sh '''
+                            export SSH_AGENT_PID=$(cat /tmp/ssh_agent_pid_${BUILD_NUMBER})
+                            export SSH_AUTH_SOCK=$(cat /tmp/ssh_auth_sock_${BUILD_NUMBER})
+
+                            cd config
+                            ansible-playbook -i inventory/production/hosts.ini -u root playbooks/07_rabbitmq.yml || exit 1
+                        '''
+                    }
+                }
+
+                stage('API') {
+                    steps {
+                        sh '''
+                            export SSH_AGENT_PID=$(cat /tmp/ssh_agent_pid_${BUILD_NUMBER})
+                            export SSH_AUTH_SOCK=$(cat /tmp/ssh_auth_sock_${BUILD_NUMBER})
+
+                            cd config
+                            ansible-playbook -i inventory/production/hosts.ini -u root playbooks/08_api.yml || exit 1
+                        '''
+                    }
+                }
+
+                stage('Reverse Proxy') {
+                    steps {
+                        sh '''
+                            export SSH_AGENT_PID=$(cat /tmp/ssh_agent_pid_${BUILD_NUMBER})
+                            export SSH_AUTH_SOCK=$(cat /tmp/ssh_auth_sock_${BUILD_NUMBER})
+
+                            cd config
+                            ansible-playbook \
+                                -i inventory/production/hosts.ini \
+                                --vault-password-file ../vault_pass.txt \
+                                -u root \
+                                playbooks/09_reverse_proxy.yml || exit 1
+                        '''
+                    }
+                }
+
+                stage('Grafana + Loki') {
+                    steps {
+                        sh '''
+                            export SSH_AGENT_PID=$(cat /tmp/ssh_agent_pid_${BUILD_NUMBER})
+                            export SSH_AUTH_SOCK=$(cat /tmp/ssh_auth_sock_${BUILD_NUMBER})
+
+                            cd config
+                            ansible-playbook -i inventory/production/hosts.ini -u root playbooks/10_grafana_loki.yml || exit 1
+                        '''
+                    }
+                }
+
+                stage('Promtail') {
+                    steps {
+                        sh '''
+                            export SSH_AGENT_PID=$(cat /tmp/ssh_agent_pid_${BUILD_NUMBER})
+                            export SSH_AUTH_SOCK=$(cat /tmp/ssh_auth_sock_${BUILD_NUMBER})
+
+                            cd config
+                            ansible-playbook -i inventory/production/hosts.ini -u root playbooks/11_promtail.yml || exit 1
+                        '''
+                    }
+                }
+
+                stage('Backups') {
+                    steps {
+                        sh '''
+                            export SSH_AGENT_PID=$(cat /tmp/ssh_agent_pid_${BUILD_NUMBER})
+                            export SSH_AUTH_SOCK=$(cat /tmp/ssh_auth_sock_${BUILD_NUMBER})
+
+                            cd config
+                            ansible-playbook -i inventory/production/hosts.ini -u root playbooks/12_backups.yml || exit 1
+                        '''
+                    }
+                }
+            }
+
+            post {
+                always {
+                    script {
+                        dir('iac') {
+                            sh 'rm -f terraform.tfrc || true'
+                        }
+
+                        sh '''
+                            if [ -f /tmp/ssh_agent_pid_${BUILD_NUMBER} ]; then
+                                SSH_AGENT_PID=$(cat /tmp/ssh_agent_pid_${BUILD_NUMBER})
+                                kill $SSH_AGENT_PID 2>/dev/null || true
+                                rm -f /tmp/ssh_agent_pid_${BUILD_NUMBER}
+                                rm -f /tmp/ssh_auth_sock_${BUILD_NUMBER}
+                            fi
+                            rm -f vault_pass.txt || true
+                        '''
+
+                        echo 'Limpieza de credenciales y agentes completada.'
+                    }
+                }
+                success {
+                    echo "Despliegue exitoso!"
+                }
+                failure {
+                    echo "El despliegue falló. Revisar logs"
+                }
+            }
+        }
+    }
+}

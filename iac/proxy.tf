@@ -1,58 +1,59 @@
 resource "proxmox_virtual_environment_container" "reverse_proxy" {
-  vm_id     = 701 # ID del LXC
-  node_name = "proxmox" # El nombre del server en el cluster (solamente tenemos un servidor)
+  provider  = proxmox.rootpam
+  vm_id     = 701
+  node_name = "proxmox"
 
-  # Parámetros de lanzamiento
   initialization {
-    hostname = "proxy" # Nombre del LXC
+    hostname = "proxy"
 
-    # Para la interfaz pública eth0
     ip_config {
       ipv4 {
         address = "192.168.0.222/24"
       }
     }
 
-    # Para la VLAN 10
     ip_config {
       ipv4 {
         address = "10.10.0.1/24"
-        gateway = "10.10.0.2" # porque su única salida a internet será el NAT instance
+        gateway = "10.10.0.254"
       }
     }
 
     user_account {
-      keys = [var.ansible_pub_key]
+      keys     = [file(var.ansible_key)]
+      password = var.lxc_password
     }
   }
 
-  unprivileged = false # Para poder correr docker
-    
-  # Configuración del Contenedor
-  #Sitema operativo
   operating_system {
-    type             = "alpine"
-    template_file_id = "local:vztmpl/devuan-5.0-standard_5.0_amd64.tar.gz" # Devuan OS
+    type             = "debian"
+    template_file_id = "local:vztmpl/debian-12-standard_12.12-1_amd64.tar.zst"
   }
 
-  cpu { cores = 1 } # Núcleos
-  memory { dedicated = 512 } # Memoria RAM
-  disk { # Disco
+  cpu { cores = 1 }
+  memory { dedicated = 512 }
+
+  disk {
     datastore_id = "local-lvm"
-    size         = 2 # 2GB
+    size         = 4
   }
 
-  # Configuración de Red
-  # eth0 (interfaz pública que da a la LAN)
   network_interface {
     name   = "eth0"
     bridge = "vmbr0"
   }
 
-  # eth1 (la interfaz privada del proxy)
   network_interface {
     name    = "eth1"
     bridge  = "vmbr0"
     vlan_id = 10
+  }
+
+  unprivileged = false
+
+  features {
+    nesting = true
+    keyctl  = true
+    fuse    = true
   }
 }

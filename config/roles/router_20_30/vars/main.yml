@@ -1,0 +1,14 @@
+---
+interfaces:
+  - all
+  - default
+  - eth0
+  - eth1
+
+upstream_router_ip: 10.20.0.254
+upstream_interface: eth0
+
+dns_servers:
+  - 1.1.1.1
+  - 9.9.9.9
+  - 208.67.222.222

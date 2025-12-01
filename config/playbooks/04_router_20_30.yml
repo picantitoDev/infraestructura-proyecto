@@ -1,0 +1,8 @@
+---
+- name: Test Router 20→30 Role
+  hosts: router_20_30
+  become: true
+  gather_facts: true
+
+  roles:
+    - router_20_30

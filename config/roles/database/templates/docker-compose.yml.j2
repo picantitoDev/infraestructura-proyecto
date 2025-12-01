@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: "{{ image_name }}"
+    container_name: "{{ container_name }}"
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    environment:
+      POSTGRES_USER: "{{ postgres_user }}"
+      POSTGRES_PASSWORD: "{{ postgres_password }}"
+      POSTGRES_DB: "{{ postgres_db }}"
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - "{{ postgres_data_dir }}:/var/lib/postgresql/data"

@@ -1,12 +1,16 @@
 {
   "name": "agile-dev",
   "version": "1.0.0",
+  "author": {
+    "name": "Piero Arturo Alcántara Rodríguez",
+    "email": "piero@example.com"
+  },
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "nodemon app.js",
     "test": "jest",
-    "sonar": "sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.projectKey=infraestructure-as-code",
+    "sonar": "sonar -Dsonar.host.url=http://192.168.0.250:9000 -Dsonar.projectKey=infraestructure-as-code",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
@@ -24,7 +28,6 @@
     "html"
   ],
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.15.0",

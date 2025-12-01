@@ -1,0 +1,7 @@
+---
+- name: restart redis container
+  ansible.builtin.shell: |
+    cd {{ docker_compose_dir }} && docker-compose restart
+  args:
+    executable: /bin/bash
+  changed_when: false
